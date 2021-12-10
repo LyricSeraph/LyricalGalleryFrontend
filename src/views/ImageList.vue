@@ -28,6 +28,7 @@ export default {
   },
   mounted() {
     this.query.albumId = this.$route.params.albumId
+    this.containerWidth = this.$refs.imageContainer.clientWidth
     this.thumbnailConfig = configs.thumbnailConfig[this.$store.state.thumbnailSizeType]
     eventBus.bus.$on(eventBus.events.screenSizeChanged, () => {
       this.containerWidth = this.$refs.imageContainer.clientWidth

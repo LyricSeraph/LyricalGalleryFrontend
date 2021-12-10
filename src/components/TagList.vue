@@ -17,14 +17,14 @@ import apis from "@/apis";
 
 export default {
   name: "TagList",
-  created() {
-    this.loadTags()
-  },
   data() {
     return {
       selected_tag_id: null,
       tags: []
     }
+  },
+  mounted() {
+    this.loadTags()
   },
   methods: {
     getTagType(tag) {

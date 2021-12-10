@@ -1,14 +1,22 @@
 <template>
-
-
   <div @mouseover="showTitle = true" @mouseleave="showTitle = false"
        @click="openResource(resource.id)"
        :style="`display: flex; width: ${itemWidth}px; height: ${itemHeight}px; position: relative;`">
-    <el-image style="flex: 1 1 auto;" fit="cover" :src="resource[thumbnailConfig.thumbnailKey]">
-      <div slot="error" class="image-slot">
-        <i class="el-icon-picture-outline"></i>
-      </div>
-    </el-image>
+
+    <template v-if="resource.status === 2">
+      <el-image style="flex: 1 1 auto;" fit="cover" :src="resource[thumbnailConfig.thumbnailKey]">
+        <div slot="error" class="image-slot">
+          <i class="el-icon-picture-outline"></i>
+        </div>
+      </el-image>
+    </template>
+    <template v-else-if="resource.status === 0 || resource.status === 1">
+      <img style="height: 100%; width: 100%; object-fit: contain" src="../assets/downloading.png"  alt="downloading"/>
+    </template>
+    <template v-else>
+      <img style="height: 100%; width: 100%; object-fit: contain" src="../assets/download-failed.png"  alt="downloading"/>
+    </template>
+
     <transition name="el-zoom-in-bottom">
       <div class="wrapper-info" v-show="showTitle">
         <span class="thumbnail-title">{{ resource.name }}</span>
@@ -100,7 +108,8 @@ export default {
 
 .tag-container {
   display: flex;
-  justify-content: center;
+  flex-flow: row nowrap;
+  justify-content: flex-end;
   gap: 4px;
 }
 

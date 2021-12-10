@@ -14,6 +14,7 @@
 
 import TitleMenu from "@/components/TitleMenu";
 import eventBus from "@/eventBus"
+import apis from "@/apis";
 
 export default {
   name: 'App',
@@ -28,6 +29,7 @@ export default {
     eventBus.bus.$on(eventBus.events.showMessage, data => {
       this.$message[data.level](data.message)
     })
+    this.loadTags()
   },
   destroyed() {
     window.removeEventListener("resize", this.screenSizeChanged)
@@ -42,6 +44,12 @@ export default {
       if (scrollTop + clientHeight >= scrollHeight) {
         eventBus.bus.$emit(eventBus.events.scrollToBottom)
       }
+    },
+    loadTags() {
+      apis.getTags().then((payload) => {
+        this.tags = payload.data
+        this.$store.commit("saveTags", this.tags)
+      })
     }
   }
 }

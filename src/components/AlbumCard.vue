@@ -10,7 +10,7 @@
             <i class="el-icon-picture-outline"></i>
           </div>
         </el-image>
-        <img v-if="album.sampleResources.length === 0" :key="`image-${album.id}-empty`" style="height: 100%; width: 100%; object-fit: contain" src="../assets/empty.png"  alt=""/>
+        <img v-if="album.sampleResources.length === 0" style="height: 100%; width: 100%; object-fit: contain" src="../assets/empty.png"  alt=""/>
       </div>
       <transition name="el-zoom-in-bottom">
         <div class="wrapper-info" v-show="showTitle">
@@ -99,7 +99,7 @@ export default {
 }
 
 .album-title {
-  font-size: 24px;
+  font-size: 100%;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -110,7 +110,7 @@ export default {
 }
 
 .album-count {
-  font-size: 16px;
+  font-size: 80%;
   color: white;
   flex-grow: 0;
 }
