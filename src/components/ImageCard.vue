@@ -11,16 +11,16 @@
       </el-image>
     </template>
     <template v-else-if="resource.status === 0 || resource.status === 1">
-      <img style="height: 100%; width: 100%; object-fit: contain" src="../assets/downloading.png"  alt="downloading"/>
+      <img class="img-placeholder" src="../assets/pic-downloading.png" alt="downloading"/>
     </template>
     <template v-else>
-      <img style="height: 100%; width: 100%; object-fit: contain" src="../assets/download-failed.png"  alt="downloading"/>
+      <img class="img-placeholder" src="../assets/pic-download-failed.png" alt="downloading"/>
     </template>
 
     <transition name="el-zoom-in-bottom">
       <div class="wrapper-info" v-show="showTitle">
         <span class="thumbnail-title">{{ resource.name }}</span>
-        <div class="tag-container">
+        <div v-if="resource.tags.length !== 0" class="tag-container">
           <el-tag v-for="t in resource.tags" :key="`tag-${resource.id}-${t.tagId}`"
                   size="mini" effect="light" :type="getTagType(t)">
             {{ getTagName(t.tagId) }}
@@ -63,7 +63,7 @@ export default {
     },
     openResource(resource) {
       console.log("open resource: ", resource)
-    },
+    }
   },
   computed: {
     thumbnailConfig() {
@@ -87,7 +87,7 @@ export default {
 
 .wrapper-info {
   display: flex;
-  flex-flow: column nowrap;
+  flex-flow: row wrap;
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -96,6 +96,7 @@ export default {
 }
 
 .thumbnail-title {
+  width: 60%;
   font-size: 100%;
   text-align: left;
   text-overflow: ellipsis;
@@ -103,14 +104,32 @@ export default {
   overflow: hidden;
   color: white;
   max-lines: 1;
-  flex-grow: 1;
+  flex: 1 1 auto;
 }
 
 .tag-container {
+  width: 60%;
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-end;
   gap: 4px;
+  flex: 1 1 auto;
+  align-self: center;
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow-x: hidden;
+}
+
+.img-placeholder {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.more-options {
+  flex-grow: 1;
+  max-width: 24px;
+  aspect-ratio: 1 / 1;
 }
 
 </style>

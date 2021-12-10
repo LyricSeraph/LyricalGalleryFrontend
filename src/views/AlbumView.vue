@@ -4,7 +4,7 @@
       <TagList />
     </div>
     <div style="flex: 1 1 auto">
-      <ImageList/>
+      <ImageList :query-abnormal-state="true" :album-id="this.$route.params.albumId"/>
     </div>
   </div>
 </template>
@@ -14,7 +14,7 @@ import eventBus from "@/eventBus"
 import TagList from "@/components/TagList";
 import ImageList from "@/components/ImageList";
 export default {
-  name: "Resources",
+  name: "AlbumView",
   components: {ImageList, TagList},
   mounted() {
     this.updateLayoutStyle(this.$refs.frameContainer.clientWidth)

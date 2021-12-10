@@ -1,16 +1,15 @@
 <template>
   <el-card>
     <div class="item-wrapper"
-         @mouseover="showTitle = true" @mouseleave="showTitle = false"
-         @click="openAlbum(album.id)">
-      <div :style="wrapperStyle">
+         @mouseover="showTitle = true" @mouseleave="showTitle = false">
+      <div :style="wrapperStyle" @click="openAlbum(album.id)">
         <el-image v-for="item in album.sampleResources" :key="`image-${album.id}-${item.id}`"
             fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
           <div slot="error" class="image-slot">
             <i class="el-icon-picture-outline"></i>
           </div>
         </el-image>
-        <img v-if="album.sampleResources.length === 0" style="height: 100%; width: 100%; object-fit: contain" src="../assets/empty.png"  alt=""/>
+        <img v-if="album.sampleResources.length === 0" style="height: 100%; width: 100%; object-fit: contain" src="../assets/pic-album-empty.png" alt=""/>
       </div>
       <transition name="el-zoom-in-bottom">
         <div class="wrapper-info" v-show="showTitle">
@@ -96,6 +95,7 @@ export default {
   width: 100%;
   padding: 8px;
   background-color: rgba(0, 0, 0, 0.4);
+  align-self: center;
 }
 
 .album-title {
@@ -106,7 +106,7 @@ export default {
   overflow: hidden;
   color: white;
   max-lines: 1;
-  flex-grow: 1;
+  flex: 1 1 auto;
 }
 
 .album-count {
@@ -114,5 +114,4 @@ export default {
   color: white;
   flex-grow: 0;
 }
-
 </style>

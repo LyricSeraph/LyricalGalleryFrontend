@@ -1,7 +1,7 @@
 <template>
   <el-card shadow="never">
     <div style="display: flex; flex-flow: column nowrap">
-      <ThumbSizeSelector />
+      <ThumbSizeSelector v-if="contents.length !== 0" />
       <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px">
         <ImageCard v-for="item in contents" :key="`resource-${item.id}`"
                    :resource="item" :size-type="sizeType"
@@ -9,7 +9,10 @@
         <span :style="`flex: 1 0 ${emptyItemWidth}px; visibility: hidden;`" v-for="i in hiddenItemCount" :key="`hidden${i}_`"/>
         <el-button type="primary" v-show="!last" plain :loading="loading" style="width: 100%" @click="loadNextPage()">Next Page</el-button>
       </div>
-
+      <div class="empty-view" v-if="last && contents.length === 0">
+        <img  src="../assets/pic-album-empty.png" alt="empty-album"/>
+        <span>No data</span>
+      </div>
     </div>
   </el-card>
 </template>
@@ -24,10 +27,19 @@ import ThumbSizeSelector from "@/components/ThumbSizeSelector";
 export default {
   name: "ImageList",
   components: {ThumbSizeSelector, ImageCard},
+  props: {
+    queryAbnormalState: {
+      default: false,
+      type: Boolean
+    },
+    albumId: {
+      default: null,
+      type: Number
+    }
+  },
   created() {
   },
   mounted() {
-    this.query.albumId = this.$route.params.albumId
     this.containerWidth = this.$refs.imageContainer.clientWidth
     this.thumbnailConfig = configs.thumbnailConfig[this.$store.state.thumbnailSizeType]
     eventBus.bus.$on(eventBus.events.screenSizeChanged, () => {
@@ -83,7 +95,7 @@ export default {
         name: null,
         albumId: null,
         tagId: null,
-        status: null,
+        status: (this.queryAbnormalState === true) ? null : 2,
       },
       loading: false,
       last: false,
@@ -99,7 +111,7 @@ export default {
         return ;
       }
       this.loading = true
-      apis.getResources({...this.query, albumId: this.$route.params.albumId }).then((payload) => {
+      apis.getResources({...this.query, albumId: this.albumId }).then((payload) => {
         this.contents.push(...payload.data.content)
         this.query.page++
         this.last = payload.data.last
@@ -115,15 +127,21 @@ export default {
     },
     emptyItemWidth() {
       return configs.thumbnailConfig[this.sizeType].displaySize
-    }
+    },
   },
 }
 </script>
 
 <style scoped>
 
-.no-margin-top-divider {
-  margin-top: 4px;
+.empty-view {
+  width: 50%;
+  max-width: 128px;
+  object-fit: cover;
+  display: flex;
+  flex-flow: column nowrap;
+  align-self: center;
 }
+
 
 </style>
