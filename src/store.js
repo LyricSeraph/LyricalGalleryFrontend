@@ -24,7 +24,7 @@ export default new Vuex.Store({
             }
         },
         setAuthKey (state, key) {
-            state.authKey = md5(key + authSalt)
+            state.authKey = md5(key + authSalt).toUpperCase()
         }
     }
 })

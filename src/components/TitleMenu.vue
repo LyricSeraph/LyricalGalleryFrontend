@@ -19,11 +19,23 @@
         </div>
       </el-menu-item>
     </el-menu>
+
+    <el-dialog
+        title="Authentication Key"
+        :visible.sync="dialogVisible"
+        width="300px">
+      <div style="display: flex; flex-flow: column nowrap; gap: 10px">
+        <el-input placeholder="please input auth key" v-model="authKey" show-password></el-input>
+        <el-button type="primary" @click="onAuthKeyUpdated">确定</el-button>
+      </div>
+    </el-dialog>
   </div>
+
 </template>
 
 <script>
 import eventBus from "@/eventBus"
+import apis from "@/apis";
 
 export default {
   "name": "TitleMenu",
@@ -31,12 +43,18 @@ export default {
   },
   data() {
     return {
-      albumList: [],
       textToSearch: "",
+      authKey: "",
+      dialogVisible: false,
     };
   },
   methods: {
-    created() {
+    onAuthKeyUpdated() {
+      this.$store.commit("setAuthKey", this.authKey)
+      this.dialogVisible = false
+      apis.checkAuthKey().then(() => {
+        this.$message.success("Config authentication key success")
+      }).finally(() =>{})
     },
     handleSelect(key) {
       if (key != null) {
@@ -46,7 +64,7 @@ export default {
       }
     },
     showAuthentication() {
-      console.log("show authentication dialog")
+      this.dialogVisible = true
     },
     search() {
       console.log("search text: " + this.textToSearch)
