@@ -2,8 +2,8 @@
 
 
   <div @mouseover="showTitle = true" @mouseleave="showTitle = false"
-       @click="openResource(resourceData.id)"
-       :style="`display: flex; width: ${thumbnailConfig.displaySize * resourceData.ratio}px; height: ${thumbnailConfig.displaySize}px; position: relative;`">
+       @click="openResource(resource.id)"
+       :style="`display: flex; width: ${itemWidth}px; height: ${itemHeight}px; position: relative;`">
     <el-image style="flex: 1 1 auto;" fit="cover" :src="resource[thumbnailConfig.thumbnailKey]">
       <div slot="error" class="image-slot">
         <i class="el-icon-picture-outline"></i>
@@ -11,9 +11,9 @@
     </el-image>
     <transition name="el-zoom-in-bottom">
       <div class="wrapper-info" v-show="showTitle">
-        <span class="thumbnail-title">{{ resourceData.name }}</span>
+        <span class="thumbnail-title">{{ resource.name }}</span>
         <div class="tag-container">
-          <el-tag v-for="t in resourceData.tags" :key="`tag-${resourceData.id}-${t.tagId}`"
+          <el-tag v-for="t in resource.tags" :key="`tag-${resource.id}-${t.tagId}`"
                   size="mini" effect="light" :type="getTagType(t)">
             {{ getTagName(t.tagId) }}
           </el-tag>
@@ -31,7 +31,14 @@ export default {
   name: "ImageCard",
   props: {
     resource: Object,
-    sizeType: String,
+    sizeType: {
+      default: 'medium',
+      type: String
+    },
+    maxWidth: {
+      default: 512,
+      type: Number
+    }
   },
   data() {
     return {
@@ -54,9 +61,16 @@ export default {
     thumbnailConfig() {
       return configs.thumbnailConfig[this.sizeType]
     },
-    resourceData() {
-      return this.resource
-    }
+    itemHeight() {
+      return this.thumbnailConfig.displaySize
+    },
+    itemWidth() {
+      let calculatedWidth = this.itemHeight * this.resource.ratio
+      if (calculatedWidth > this.maxWidth) {
+        return this.maxWidth
+      }
+      return calculatedWidth
+    },
   }
 }
 </script>
@@ -74,7 +88,7 @@ export default {
 }
 
 .thumbnail-title {
-  font-size: 20%;
+  font-size: 100%;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;

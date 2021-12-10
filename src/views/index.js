@@ -1,8 +1,7 @@
 import Resources from "@/views/Resources"
 import Albums from "@/views/Albums"
-import Latest from "@/views/Latest";
-
+import ImageList from "@/views/ImageList";
 
 export default {
-    Latest, Resources, Albums
+    Resources, Albums, ImageList
 }

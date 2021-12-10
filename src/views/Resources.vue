@@ -3,7 +3,7 @@
     <div :style="`width: ${sideMenuWidth}; min-width: 240px`">
       <TagList />
     </div>
-    <div style="flex-grow: 1">
+    <div style="flex: 1 1 auto">
       <ImageList/>
     </div>
   </div>
@@ -12,7 +12,7 @@
 <script>
 import eventBus from "@/eventBus"
 import TagList from "@/components/TagList";
-import ImageList from "@/components/ImageList";
+import ImageList from "@/views/ImageList";
 export default {
   name: "Resources",
   components: {ImageList, TagList},

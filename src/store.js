@@ -10,12 +10,12 @@ let authSalt = "LyricalGallery"
 export default new Vuex.Store({
     state: {
         tagMap: {},
-        thumbnailSize: 'medium',
+        thumbnailSizeType: 'medium',
         authKey: ""
     },
     mutations: {
         saveThumbSize(state, sizeType) {
-            state.thumbnailSize = sizeType
+            state.thumbnailSizeType = sizeType
         },
         saveTags(state, tags) {
             for (let i = 0; i < tags.length; i++) {

@@ -12,7 +12,7 @@ export default new VueRouter({
         {
             path: "/latest",
             name: "latest",
-            component: Views.Latest
+            component: Views.ImageList
         },
         {
             path: "/albums",
@@ -22,6 +22,11 @@ export default new VueRouter({
         {
             path: "/album/:albumId",
             name: "album",
+            component: Views.Resources
+        },
+        {
+            path: "/search",
+            name: "search",
             component: Views.Resources
         },
         {

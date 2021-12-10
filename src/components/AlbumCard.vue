@@ -2,19 +2,20 @@
   <el-card>
     <div class="item-wrapper"
          @mouseover="showTitle = true" @mouseleave="showTitle = false"
-         @click="openAlbum(albumData.id)">
-      <div class="thumbnail-wrapper">
-        <el-image v-for="item in albumData.sampleResources" :key="'image' + item.id"
+         @click="openAlbum(album.id)">
+      <div :style="wrapperStyle">
+        <el-image v-for="item in album.sampleResources" :key="`image-${album.id}-${item.id}`"
             fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
           <div slot="error" class="image-slot">
             <i class="el-icon-picture-outline"></i>
           </div>
         </el-image>
+        <img v-if="album.sampleResources.length === 0" :key="`image-${album.id}-empty`" style="height: 100%; width: 100%; object-fit: contain" src="../assets/empty.png"  alt=""/>
       </div>
       <transition name="el-zoom-in-bottom">
         <div class="wrapper-info" v-show="showTitle">
-          <span class="album-title">{{ albumData.name }}</span>
-          <span class="album-count">{{ albumData.albumSize }}&nbsp;<i class="el-icon-picture-outline"/></span>
+          <span class="album-title">{{ album.name }}</span>
+          <span class="album-count">{{ album.albumSize }}&nbsp;<i class="el-icon-picture-outline"/></span>
         </div>
       </transition>
     </div>
@@ -28,7 +29,14 @@ export default {
   name: "AlbumCard",
   props: {
     album: Object,
-    sizeType: String,
+    sizeType: {
+      default: 'medium',
+      type: String
+    },
+    maxWidth: {
+      default: 512,
+      type: Number
+    }
   },
   data() {
     return {
@@ -42,11 +50,31 @@ export default {
     }
   },
   computed: {
-    albumData() {
-      return this.album
-    },
     thumbnailConfig() {
       return configs.thumbnailConfig[this.sizeType]
+    },
+    thumbnailEdge() {
+      if (this.album.sampleResources.length > 1) {
+        return 2
+      } else {
+        return 1
+      }
+    },
+    thumbnailSize() {
+        return this.thumbnailConfig.displaySize / this.thumbnailEdge
+    },
+    wrapperStyle() {
+      let edge = this.thumbnailEdge
+      let gridStyle = "display: grid;"
+      let columnStyle = "grid-template-columns:"
+      let rowStyle = "grid-template-rows:"
+      for (let i = 0; i < edge; i++) {
+        columnStyle += ` ${this.thumbnailSize}px`
+        rowStyle += ` ${this.thumbnailSize}px`
+      }
+      columnStyle += ";"
+      rowStyle += ";"
+      return gridStyle + columnStyle + rowStyle
     }
   }
 }
@@ -56,12 +84,6 @@ export default {
 
 .item-wrapper {
   position: relative;
-}
-
-.thumbnail-wrapper {
-  display: grid;
-  grid-template-columns: 128px 128px;
-  grid-template-rows: 128px 128px;
 }
 
 .wrapper-info {

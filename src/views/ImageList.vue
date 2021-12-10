@@ -1,16 +1,12 @@
 <template>
   <el-card shadow="never">
     <div style="display: flex; flex-flow: column nowrap">
-      <el-divider class="no-margin-top-divider" content-position="right">
-        <i class="el-icon-picture" @click="changeSize('large')"/>
-        <i class="el-icon-menu" @click="changeSize('medium')"/>
-        <i class="el-icon-s-grid" @click="changeSize('small')"/>
-      </el-divider>
+      <ThumbSizeSelector />
       <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px">
         <ImageCard v-for="item in contents" :key="`resource-${item.id}`"
-                   :resource="item" :sizeType="thumbnailConfig.sizeType"
+                   :resource="item" :size-type="sizeType"
                    style="flex: 1 1 auto" />
-        <span :style="`flex: 1 0 ${thumbnailConfig.displaySize}px; visibility: hidden;`" v-for="i in hiddenItemCount" :key="`hidden${i}_`"/>
+        <span :style="`flex: 1 0 ${emptyItemWidth}px; visibility: hidden;`" v-for="i in hiddenItemCount" :key="`hidden${i}_`"/>
         <el-button type="primary" v-show="!last" plain :loading="loading" style="width: 100%" @click="loadNextPage()">Next Page</el-button>
       </div>
 
@@ -21,20 +17,20 @@
 <script>
 import eventBus from "@/eventBus";
 import apis from "@/apis"
-import ImageCard from "@/components/ImageCard";
 import configs from "@/configs";
+import ImageCard from "@/components/ImageCard";
+import ThumbSizeSelector from "@/components/ThumbSizeSelector";
 
 export default {
   name: "ImageList",
-  components: {ImageCard},
+  components: {ThumbSizeSelector, ImageCard},
   created() {
   },
   mounted() {
     this.query.albumId = this.$route.params.albumId
-    this.thumbnailConfig = configs.thumbnailConfig[this.$store.state.thumbnailSize]
-    this.onScreenSizeChanged()
+    this.thumbnailConfig = configs.thumbnailConfig[this.$store.state.thumbnailSizeType]
     eventBus.bus.$on(eventBus.events.screenSizeChanged, () => {
-      this.onScreenSizeChanged()
+      this.containerWidth = this.$refs.imageContainer.clientWidth
     })
     eventBus.bus.$on(eventBus.events.scrollToBottom, () => {
       if (!this.last && !this.loading) {
@@ -61,6 +57,9 @@ export default {
       this.contents = []
       this.loadNextPage()
     })
+    eventBus.bus.$on(eventBus.events.itemSizeChanged, (sizeType) => {
+      this.sizeType = sizeType
+    })
     this.loadNextPage()
   },
   beforeDestroy() {
@@ -68,12 +67,13 @@ export default {
     eventBus.bus.$off(eventBus.events.scrollToBottom)
     eventBus.bus.$off(eventBus.events.searchTag)
     eventBus.bus.$off(eventBus.events.searchText)
+    eventBus.bus.$off(eventBus.events.itemSizeChanged)
   },
   data() {
     return  {
       // display parameters
-      thumbnailConfig: configs.thumbnailConfig[this.$store.state.thumbnailSize],
-      hiddenItemCount: 8,
+      sizeType: this.$store.state.thumbnailSizeType,
+      containerWidth: 1024,
 
       // query parameters
       query: {
@@ -92,15 +92,6 @@ export default {
     }
   },
   methods: {
-    onScreenSizeChanged() {
-      this.hiddenItemCount = Math.floor((this.$refs.imageContainer.clientWidth + 10) / (this.thumbnailConfig.displaySize + 10))
-    },
-    changeSize(sizeType) {
-      console.log("change size: ", sizeType)
-      this.thumbnailConfig = configs.thumbnailConfig[sizeType]
-      this.$store.commit("saveThumbSize", sizeType)
-      this.onScreenSizeChanged()
-    },
     loadNextPage() {
       if (this.loading) {
         this.$message.warning("Querying data, please wait a second")
@@ -115,7 +106,16 @@ export default {
         this.loading = false
       })
     }
-  }
+  },
+  computed: {
+    hiddenItemCount() {
+      let thumbnailConfig = configs.thumbnailConfig[this.sizeType]
+      return Math.floor((this.containerWidth + 10) / (thumbnailConfig.displaySize + 10))
+    },
+    emptyItemWidth() {
+      return configs.thumbnailConfig[this.sizeType].displaySize
+    }
+  },
 }
 </script>
 

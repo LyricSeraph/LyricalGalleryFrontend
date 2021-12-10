@@ -6,6 +6,7 @@ const events = {
     searchText: "search-text", // param: {level: string, text: string}
     searchTag: "search-tag", // param: id: long
     scrollToBottom: "scroll-to-bottom", // no params
+    itemSizeChanged: "item-size-changed", // params: size-type: string
 }
 
 const bus = new Vue()
