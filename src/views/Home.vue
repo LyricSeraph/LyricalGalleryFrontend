@@ -1,10 +1,13 @@
 <template>
   <div ref="frameContainer" :style="`display: flex; flex-flow: row ${wrapState}; gap: 24px;`">
+
+    <div style="flex: 1 1 auto">
+      <el-card shadow="never">
+        <ImageList/>
+      </el-card>
+    </div>
     <div :style="`width: ${sideMenuWidth}; min-width: 240px`">
       <TagList />
-    </div>
-    <div style="flex: 1 1 auto">
-      <ImageList/>
     </div>
   </div>
 </template>
@@ -17,6 +20,7 @@ export default {
   name: "Resources",
   components: {ImageList, TagList},
   mounted() {
+
     this.updateLayoutStyle(this.$refs.frameContainer.clientWidth)
     eventBus.bus.$on(eventBus.events.screenSizeChanged, () => {
       this.updateLayoutStyle(this.$refs.frameContainer.clientWidth)

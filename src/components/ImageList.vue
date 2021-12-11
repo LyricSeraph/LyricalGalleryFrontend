@@ -1,9 +1,8 @@
 <template>
-  <el-card shadow="never">
     <div style="display: flex; flex-flow: column nowrap">
       <ThumbSizeSelector v-if="contents.length !== 0" />
       <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px">
-        <ImageCard v-for="item in contents" :key="`resource-${item.id}`"
+        <ImageCard v-for="item in contents" :key="`resource-${item.resourceId}`"
                    :resource="item" :size-type="sizeType"
                    style="flex: 1 1 auto" />
         <span :style="`flex: 1 0 ${emptyItemWidth}px; visibility: hidden;`" v-for="i in hiddenItemCount" :key="`hidden${i}_`"/>
@@ -14,7 +13,6 @@
         <span>No data</span>
       </div>
     </div>
-  </el-card>
 </template>
 
 <script>

@@ -65,11 +65,14 @@ export default {
     async checkAuthKey() {
         return await instance.get("/private/api/verification")
     },
+    async getAlbum(id) {
+        return await instance.get("/public/api/album/" + id)
+    },
     async getAlbums(data) {
         return await instance.get("/public/api/album?" + querystring.stringify(data))
     },
-    async getTags() {
-        return await instance.get("/public/api/tag")
+    async getTags(data) {
+        return await instance.get("/public/api/tag?" + querystring.stringify(data))
     },
     async getResources(data) {
         return await instance.get("/public/api/resource?" + querystring.stringify(data));

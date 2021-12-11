@@ -20,7 +20,7 @@ export default new Vuex.Store({
         saveTags(state, tags) {
             for (let i = 0; i < tags.length; i++) {
                 let t = tags[i]
-                state.tagMap[t.id] = t.name
+                state.tagMap[t.tagId] = t.name
             }
         },
         setAuthKey (state, key) {

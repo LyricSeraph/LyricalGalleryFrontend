@@ -1,7 +1,7 @@
 <template>
   <el-card shadow="never">
     <div style="display:flex; flex-flow: row wrap; gap: 10px">
-      <el-tag v-for="t in tags" :key="t.id" style="cursor: pointer"
+      <el-tag v-for="t in tags" :key="t.tagId" style="cursor: pointer"
               :type="getTagType(t)"
               :effect="getTagEffect(t)"
               @click="selectTag(t)">
@@ -17,9 +17,15 @@ import apis from "@/apis";
 
 export default {
   name: "TagList",
+  props: {
+    albumId: {
+      default: null,
+      type: Number,
+    }
+  },
   data() {
     return {
-      selected_tag_id: null,
+      selectedTagId: null,
       tags: []
     }
   },
@@ -29,28 +35,27 @@ export default {
   methods: {
     getTagType(tag) {
       const colorType = ["", "success", "info", "warning", "danger"]
-      return colorType[tag.id % 5]
+      return colorType[tag.tagId % 5]
     },
     getTagEffect(tag) {
-      if (this.selected_tag_id === tag.id) {
+      if (this.selectedTagId === tag.tagId) {
         return "dark"
       } else {
         return "light"
       }
     },
     selectTag(tag) {
-      if (this.selected_tag_id === tag.id) {
-        this.selected_tag_id = null
+      if (this.selectedTagId === tag.tagId) {
+        this.selectedTagId = null
       } else {
-        this.selected_tag_id = tag.id
+        this.selectedTagId = tag.tagId
       }
-      console.log("search tag:", this.selected_tag_id)
-      eventBus.bus.$emit(eventBus.events.searchTag, this.selected_tag_id)
+      console.log("search tag:", this.selectedTagId)
+      eventBus.bus.$emit(eventBus.events.searchTag, this.selectedTagId)
     },
     loadTags() {
-      apis.getTags().then((payload) => {
+      apis.getTags({albumId: this.albumId}).then((payload) => {
         this.tags = payload.data
-        this.$store.commit("saveTags", this.tags)
       })
     }
   }

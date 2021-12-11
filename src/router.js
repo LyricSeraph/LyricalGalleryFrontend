@@ -10,9 +10,9 @@ export default new VueRouter({
     scrollBehavior: () => ({y: 0}),
     routes: [
         {
-            path: "/latest",
-            name: "latest",
-            component: Views.Latest
+            path: "/home",
+            name: "home",
+            component: Views.Resources
         },
         {
             path: "/albums",
@@ -25,13 +25,8 @@ export default new VueRouter({
             component: Views.AlbumView
         },
         {
-            path: "/search",
-            name: "search",
-            component: Views.Resources
-        },
-        {
             path: "*",
-            redirect: "/latest"
+            redirect: "/home"
         }
     ]
 })

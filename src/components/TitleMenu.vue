@@ -1,13 +1,18 @@
 <template>
   <div>
-    <el-menu default-active="/latest" mode="horizontal" @select="handleSelect">
-      <el-menu-item index="/">
+    <el-menu :default-active="currentActive" mode="horizontal" @select="handleSelect">
+      <el-menu-item index="">
         <a href="/" target="_self">
           <v-img max-height="60" max-width="200" src="../../src/assets/logo.png" alt=""/>
         </a>
       </el-menu-item>
-      <el-menu-item index="/latest">Latest</el-menu-item>
+      <el-menu-item index="/home">Latest</el-menu-item>
       <el-menu-item index="/albums">Album</el-menu-item>
+      <el-submenu index="/management">
+        <template slot="title">Management</template>
+        <el-menu-item index="/management/album">Album Management</el-menu-item>
+        <el-menu-item index="/management/tag">Tag Management</el-menu-item>
+      </el-submenu>
       <el-menu-item class="non-menu-item dock-right">
         <el-link type="primary" @click="showAuthentication">Authentication</el-link>
       </el-menu-item>
@@ -43,6 +48,8 @@ export default {
   },
   data() {
     return {
+      currentActive: "/home",
+      supportedPath: ["/home", "/albums", "/management/album", "/management/tag"],
       textToSearch: "",
       authKey: "",
       dialogVisible: false,
@@ -69,6 +76,16 @@ export default {
     search() {
       console.log("search text: " + this.textToSearch)
       eventBus.bus.$emit(eventBus.events.searchText, this.textToSearch)
+    }
+  },
+  watch: {
+    $route(to, from) {
+      console.log("router: ", from, to)
+      if (this.supportedPath.includes(to.path)) {
+        this.currentActive = to.path
+      } else {
+        this.currentActive = ""
+      }
     }
   }
 }

@@ -1,10 +1,17 @@
 <template>
   <div ref="frameContainer" :style="`display: flex; flex-flow: row ${wrapState}; gap: 24px;`">
-    <div :style="`width: ${sideMenuWidth}; min-width: 240px`">
-      <TagList />
-    </div>
     <div style="flex: 1 1 auto">
-      <ImageList :query-abnormal-state="true" :album-id="this.$route.params.albumId"/>
+      <el-card shadow="never">
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item :to="{ path: '/home' }">Home</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/albums' }">Albums</el-breadcrumb-item>
+          <el-breadcrumb-item>{{ albumData.name }} ({{ albumData.albumSize }})</el-breadcrumb-item>
+        </el-breadcrumb>
+        <ImageList :query-abnormal-state="true" :album-id="parseInt(this.$route.params.albumId)"/>
+      </el-card>
+    </div>
+    <div :style="`width: ${sideMenuWidth}; min-width: 240px`">
+      <TagList :album-id="parseInt(this.$route.params.albumId)"/>
     </div>
   </div>
 </template>
@@ -13,6 +20,7 @@
 import eventBus from "@/eventBus"
 import TagList from "@/components/TagList";
 import ImageList from "@/components/ImageList";
+import apis from "@/apis";
 export default {
   name: "AlbumView",
   components: {ImageList, TagList},
@@ -21,6 +29,7 @@ export default {
     eventBus.bus.$on(eventBus.events.screenSizeChanged, () => {
       this.updateLayoutStyle(this.$refs.frameContainer.clientWidth)
     })
+    this.loadAlbum()
   },
   beforeDestroy() {
     eventBus.bus.$off(eventBus.events.screenSizeChanged)
@@ -29,6 +38,12 @@ export default {
     return {
       wrapState: "nowrap",
       sideMenuWidth: "240px",
+      albumData: {
+        albumId: null,
+        name: '',
+        albumSize: 0,
+      },
+      loading: false,
     }
   },
   methods: {
@@ -40,6 +55,14 @@ export default {
         this.wrapState = 'wrap'
         this.sideMenuWidth = "100%"
       }
+    },
+    loadAlbum() {
+      this.loading = true
+      apis.getAlbum(this.$route.params.albumId).then((payload) => {
+        this.albumData = payload.data
+      }).finally(() => {
+        this.loading = false
+      })
     }
   }
 }

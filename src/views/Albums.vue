@@ -1,10 +1,13 @@
 <template>
   <el-card shadow="never">
-    <div style="display: flex; flex-flow: column nowrap">
+    <div style="display: flex; flex-flow: column nowrap; ">
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item :to="{ path: '/home' }">Home</el-breadcrumb-item>
+        <el-breadcrumb-item>Albums</el-breadcrumb-item>
+      </el-breadcrumb>
       <ThumbSizeSelector />
-      <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px">
-        <AlbumCard v-for="item in contents" :key="'album' + item.id" :album="item" :size-type="sizeType" />
-        <span :style="`flex: 1 0 ${emptyItemWidth}px; visibility: hidden;`" v-for="i in hiddenItemCount" :key="`hidden${i}_`"/>
+      <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px; justify-content: center">
+        <AlbumCard v-for="item in contents" :key="'album' + item.albumId" :album="item" :size-type="sizeType" />
         <el-button type="primary" v-show="!last" plain :loading="loading" style="width: 100%" @click="loadNextPage()">Next Page</el-button>
       </div>
     </div>
@@ -15,7 +18,6 @@
 import eventBus from "@/eventBus";
 import apis from "@/apis"
 import AlbumCard from "@/components/AlbumCard";
-import configs from "@/configs";
 import ThumbSizeSelector from "@/components/ThumbSizeSelector";
 
 export default {
@@ -55,8 +57,6 @@ export default {
     return  {
       // display parameters
       sizeType: this.$store.state.thumbnailSizeType,
-      containerWidth: 1024,
-
       // query parameters
       query: {
         page: 0,
@@ -86,15 +86,7 @@ export default {
       })
     },
   },
-  computed: {
-    hiddenItemCount() {
-      let thumbnailConfig = configs.thumbnailConfig[this.sizeType]
-      return Math.floor((this.containerWidth + 10) / (thumbnailConfig.displaySize + 10))
-    },
-    emptyItemWidth() {
-      return configs.thumbnailConfig[this.sizeType].displaySize
-    }
-  },
+  computed: {},
 }
 </script>
 

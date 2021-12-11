@@ -1,6 +1,6 @@
 <template>
   <div @mouseover="showTitle = true" @mouseleave="showTitle = false"
-       @click="openResource(resource.id)"
+       @click="openResource(resource.resourceId)"
        :style="`display: flex; width: ${itemWidth}px; height: ${itemHeight}px; position: relative;`">
 
     <template v-if="resource.status === 2">
@@ -21,7 +21,7 @@
       <div class="wrapper-info" v-show="showTitle">
         <span class="thumbnail-title">{{ resource.name }}</span>
         <div v-if="resource.tags.length !== 0" class="tag-container">
-          <el-tag v-for="t in resource.tags" :key="`tag-${resource.id}-${t.tagId}`"
+          <el-tag v-for="t in resource.tags" :key="`tag-${resource.resourceId}-${t.tagId}`"
                   size="mini" effect="light" :type="getTagType(t)">
             {{ getTagName(t.tagId) }}
           </el-tag>

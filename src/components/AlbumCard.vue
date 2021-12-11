@@ -2,8 +2,8 @@
   <el-card>
     <div class="item-wrapper"
          @mouseover="showTitle = true" @mouseleave="showTitle = false">
-      <div :style="wrapperStyle" @click="openAlbum(album.id)">
-        <el-image v-for="item in album.sampleResources" :key="`image-${album.id}-${item.id}`"
+      <div :style="wrapperStyle" @click="openAlbum(album.albumId)">
+        <el-image v-for="item in album.sampleResources" :key="`image-${album.albumId}-${item.resourceId}`"
             fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
           <div slot="error" class="image-slot">
             <i class="el-icon-picture-outline"></i>
