@@ -8,20 +8,20 @@
             <el-image :key="`album${album.albumId}-${item.resourceId}`"
                       fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
               <div slot="error" class="image-slot" style="width: 100%; height: 100%">
-                <img class="img-placeholder" src="../assets/pic-no-thumbnail.png" alt=""/>
+                <img class="img-placeholder" :src="`${publicPath}/assets/pic-no-thumbnail.png`" alt=""/>
               </div>
             </el-image>
           </template>
           <template v-else-if="item.status === 0 || item.status === 1">
             <img :key="`album${album.albumId}-${item.resourceId}`"
-                 class="img-placeholder" src="../assets/pic-downloading.png" alt="downloading"/>
+                 class="img-placeholder" :src="`${publicPath}/assets/pic-downloading.png`" alt="downloading"/>
           </template>
           <template v-else>
             <img :key="`album${album.albumId}-${item.resourceId}`"
-                 class="img-placeholder" src="../assets/pic-download-failed.png" alt="downloading"/>
+                 class="img-placeholder" :src="`${publicPath}/assets/pic-download-failed.png`" alt="downloading"/>
           </template>
         </template>
-        <img v-if="album.sampleResources.length === 0" style="height: 100%; width: 100%; object-fit: contain" src="../assets/pic-album-empty.png" alt=""/>
+        <img v-if="album.sampleResources.length === 0" style="height: 100%; width: 100%; object-fit: contain" :src="`${publicPath}/assets/pic-album-empty.png`" alt=""/>
       </div>
       <transition name="el-zoom-in-bottom">
         <div class="wrapper-info" v-show="showTitle">
@@ -51,6 +51,7 @@ export default {
   },
   data() {
     return {
+      publicPath: process.env.BASE_URL,
       showTitle: false
     }
   },

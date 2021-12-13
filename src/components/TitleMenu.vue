@@ -3,7 +3,7 @@
     <el-menu :default-active="currentActive" mode="horizontal" @select="handleSelect">
       <el-menu-item index="">
         <a href="/" target="_self">
-          <v-img max-height="60" max-width="200" src="../../src/assets/logo.png" alt=""/>
+          <v-img max-height="60" max-width="200" :src="`${publicPath}/assets/logo.png`" alt=""/>
         </a>
       </el-menu-item>
       <el-menu-item index="/home">Latest</el-menu-item>
@@ -48,6 +48,7 @@ export default {
   },
   data() {
     return {
+      publicPath: process.env.BASE_URL,
       currentActive: "/home",
       supportedPath: ["/home", "/albums", "/management/albums", "/management/tags"],
       textToSearch: "",

@@ -5,15 +5,15 @@
     <template v-if="resourceData.status === 2">
       <el-image style="flex: 1 1 auto;" fit="cover" :src="resourceData[thumbnailConfig.thumbnailKey]">
         <div slot="error" class="image-slot" style="width: 100%; height: 100%">
-          <img class="img-placeholder" src="../assets/pic-no-thumbnail.png" alt=""/>
+          <img class="img-placeholder" :src="`${publicPath}/assets/pic-no-thumbnail.png`" alt=""/>
         </div>
       </el-image>
     </template>
     <template v-else-if="resourceData.status === 0 || resourceData.status === 1">
-      <img class="img-placeholder" src="../assets/pic-downloading.png" alt="downloading"/>
+      <img class="img-placeholder" :src="`${publicPath}/assets/pic-downloading.png`" alt="downloading"/>
     </template>
     <template v-else>
-      <img class="img-placeholder" src="../assets/pic-download-failed.png" alt="downloading"/>
+      <img class="img-placeholder" :src="`${publicPath}/assets/pic-download-failed.png`" alt="downloading"/>
     </template>
 
     <transition name="el-fade-in">
@@ -104,6 +104,7 @@ export default {
   },
   data() {
     return {
+      publicPath: process.env.BASE_URL,
       showCover: false,
       resourceData: this.resource,
       showOrigin: {

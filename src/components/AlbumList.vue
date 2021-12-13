@@ -3,7 +3,7 @@
     <ThumbSizeSelector />
     <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px; justify-content: center">
       <el-card v-if="management">
-        <img src="../assets/pic-add-new.png"
+        <img :src="`${publicPath}/assets/pic-add-new.png`"
              :style="`object-fit: cover; width: ${thumbnailConfig.displaySize}px; height: ${thumbnailConfig.displaySize}px`"
              @click="showCreateDialog = true"  alt="add-new-album"/>
       </el-card>
@@ -76,6 +76,7 @@ export default {
   },
   data() {
     return  {
+      publicPath: process.env.BASE_URL,
       // display parameters
       sizeType: this.$store.state.thumbnailSizeType,
       // query parameters

@@ -9,7 +9,7 @@
         <el-button type="primary" v-show="!last" plain :loading="loading" style="width: 100%" @click="loadNextPage()">Next Page</el-button>
       </div>
       <div class="empty-view" v-if="last && contents.length === 0">
-        <img  src="../assets/pic-album-empty.png" alt="empty-album"/>
+        <img  :src="`${publicPath}/assets/pic-album-empty.png`" alt="empty-album"/>
         <span>No data</span>
       </div>
     </div>
@@ -102,6 +102,7 @@ export default {
   },
   data() {
     return  {
+      publicPath: process.env.BASE_URL,
       // display parameters
       sizeType: this.$store.state.thumbnailSizeType,
       containerWidth: 1024,
