@@ -1,6 +1,7 @@
 <template>
   <el-card shadow="never">
-    <div style="display:flex; flex-flow: row wrap; gap: 10px">
+    <span style="font-size: 24px">Available Tags</span>
+    <div style="display:flex; flex-flow: row wrap; gap: 10px; margin-top: 16px">
       <el-tag v-for="t in tags" :key="t.tagId" style="cursor: pointer"
               :type="getTagType(t)"
               :effect="getTagEffect(t)"

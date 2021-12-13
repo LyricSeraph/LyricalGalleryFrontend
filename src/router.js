@@ -25,6 +25,16 @@ export default new VueRouter({
             component: Views.AlbumView
         },
         {
+            path: "/management/albums",
+            name: "management albums",
+            component: Views.AlbumManagement
+        },
+        {
+            path: "/management/album/:albumId",
+            name: "album editor",
+            component: Views.AlbumEditor
+        },
+        {
             path: "*",
             redirect: "/home"
         }

@@ -3,16 +3,32 @@
     <div style="display: flex; flex-flow: column nowrap; ">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/home' }">Home</el-breadcrumb-item>
-        <el-breadcrumb-item>Albums</el-breadcrumb-item>
+        <el-breadcrumb-item>Album Management</el-breadcrumb-item>
       </el-breadcrumb>
       <ThumbSizeSelector />
       <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px; justify-content: center">
+        <el-card>
+        <img src="../assets/pic-add-new.png"
+             :style="`object-fit: cover; width: ${thumbnailConfig.displaySize}px; height: ${thumbnailConfig.displaySize}px`"
+             @click="showCreateDialog = true"  alt="add-new-album"/>
+        </el-card>
         <AlbumCard v-for="item in contents" :key="'album' + item.albumId"
                    :album="item" :size-type="sizeType" @click="onAlbumClick(item.albumId)" />
-        <el-button type="primary" v-show="!last" plain :loading="loading" style="width: 100%" @click="loadNextPage()">Next Page</el-button>
+        <el-button type="primary" v-show="!last" plain :loading="loadingForContents" style="width: 100%" @click="loadNextPage()">Next Page</el-button>
       </div>
     </div>
+
+    <el-dialog
+        title="Create New Album"
+        :visible.sync="showCreateDialog"
+        width="300px">
+      <div style="display: flex; flex-flow: column nowrap; gap: 10px">
+        <el-input placeholder="Input new album's name" v-model="newAlbumData.name" @keyup.enter.native="createNewAlbum"></el-input>
+        <el-button type="primary" @click="createNewAlbum" :loading="loadingForCreate">确定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
+
 </template>
 
 <script>
@@ -20,16 +36,17 @@ import eventBus from "@/eventBus";
 import apis from "@/apis"
 import AlbumCard from "@/components/AlbumCard";
 import ThumbSizeSelector from "@/components/ThumbSizeSelector";
+import configs from "@/configs";
 
 export default {
-  name: "Albums",
+  name: "AlbumManagement",
   components: {ThumbSizeSelector, AlbumCard},
   mounted() {
     eventBus.bus.$on(eventBus.events.screenSizeChanged, () => {
       this.containerWidth = this.$refs.imageContainer.clientWidth
     })
     eventBus.bus.$on(eventBus.events.scrollToBottom, () => {
-      if (!this.last && !this.loading) {
+      if (!this.last && !this.loadingForContents) {
         this.loadNextPage()
       }
     })
@@ -64,33 +81,55 @@ export default {
         size: 20,
         name: null
       },
-      loading: false,
-      last: false,
-
-      // query result
       contents: [],
+      loadingForContents: false,
+      last: false,
+      // query result
+
+      showCreateDialog: false,
+      loadingForCreate: false,
+      newAlbumData: {
+        name: "",
+      }
     }
   },
   methods: {
     onAlbumClick(albumId) {
-      this.$router.push("/album/" + albumId)
+      this.$router.push("/management/album/" + albumId)
+    },
+    createNewAlbum() {
+      this.loadingForCreate = true
+      apis.createAlbum(this.newAlbumData).then(() => {
+        this.query.page = 0
+        this.showCreateDialog = false
+        this.loadNextPage()
+      }).finally(() => {
+        this.loadingForCreate = false
+      })
     },
     loadNextPage() {
-      if (this.loading) {
+      if (this.loadingForContents) {
         this.$message.warning("Querying data, please wait a second")
         return ;
       }
-      this.loading = true
+      this.loadingForContents = true
       apis.getAlbums(this.query).then((payload) => {
+        if (this.query.page === 0) {
+          this.contents = []
+        }
         this.contents.push(...payload.data.content)
         this.query.page++
         this.last = payload.data.last
       }).finally(() => {
-        this.loading = false
+        this.loadingForContents = false
       })
     },
   },
-  computed: {},
+  computed: {
+    thumbnailConfig() {
+      return configs.thumbnailConfig[this.sizeType]
+    },
+  },
 }
 </script>
 

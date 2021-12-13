@@ -10,8 +10,8 @@
       <el-menu-item index="/albums">Album</el-menu-item>
       <el-submenu index="/management">
         <template slot="title">Management</template>
-        <el-menu-item index="/management/album">Album Management</el-menu-item>
-        <el-menu-item index="/management/tag">Tag Management</el-menu-item>
+        <el-menu-item index="/management/albums">Album Management</el-menu-item>
+        <el-menu-item index="/management/tags">Tag Management</el-menu-item>
       </el-submenu>
       <el-menu-item class="non-menu-item dock-right">
         <el-link type="primary" @click="showAuthentication">Authentication</el-link>
@@ -49,7 +49,7 @@ export default {
   data() {
     return {
       currentActive: "/home",
-      supportedPath: ["/home", "/albums", "/management/album", "/management/tag"],
+      supportedPath: ["/home", "/albums", "/management/albums", "/management/tags"],
       textToSearch: "",
       authKey: "",
       dialogVisible: false,

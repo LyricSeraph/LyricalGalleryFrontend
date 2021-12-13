@@ -2,11 +2,11 @@
   <el-card>
     <div class="item-wrapper"
          @mouseover="showTitle = true" @mouseleave="showTitle = false">
-      <div :style="wrapperStyle" @click="openAlbum(album.albumId)">
+      <div :style="wrapperStyle" @click="$emit('click')">
         <el-image v-for="item in album.sampleResources" :key="`image-${album.albumId}-${item.resourceId}`"
-            fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
-          <div slot="error" class="image-slot">
-            <i class="el-icon-picture-outline"></i>
+                   fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
+          <div slot="error" class="image-slot" style="width: 100%; height: 100%">
+            <img class="img-placeholder" src="../assets/pic-no-thumbnail.png" alt=""/>
           </div>
         </el-image>
         <img v-if="album.sampleResources.length === 0" style="height: 100%; width: 100%; object-fit: contain" src="../assets/pic-album-empty.png" alt=""/>
@@ -114,4 +114,13 @@ export default {
   color: white;
   flex-grow: 0;
 }
+
+.img-placeholder {
+  object-fit: scale-down;
+  width: 100%;
+  height: 100%;
+  alignment: center
+}
+
+
 </style>

@@ -3,7 +3,7 @@
       <ThumbSizeSelector v-if="contents.length !== 0" />
       <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px">
         <ImageCard v-for="item in contents" :key="`resource-${item.resourceId}`"
-                   :resource="item" :size-type="sizeType"
+                   :resource="item" :size-type="sizeType" :management="management"
                    style="flex: 1 1 auto" />
         <span :style="`flex: 1 0 ${emptyItemWidth}px; visibility: hidden;`" v-for="i in hiddenItemCount" :key="`hidden${i}_`"/>
         <el-button type="primary" v-show="!last" plain :loading="loading" style="width: 100%" @click="loadNextPage()">Next Page</el-button>
@@ -26,6 +26,10 @@ export default {
   name: "ImageList",
   components: {ThumbSizeSelector, ImageCard},
   props: {
+    management: {
+      default: false,
+      type: Boolean,
+    },
     queryAbnormalState: {
       default: false,
       type: Boolean
@@ -71,6 +75,15 @@ export default {
     eventBus.bus.$on(eventBus.events.itemSizeChanged, (sizeType) => {
       this.sizeType = sizeType
     })
+    eventBus.bus.$on(eventBus.events.newItemAdded, (item) => {
+      this.contents.unshift(item)
+    })
+    eventBus.bus.$on(eventBus.events.itemRemoved, (item) => {
+      let index = this.contents.findIndex((value) => { return value.resourceId === item.resourceId })
+      if (index >= 0) {
+        this.contents.splice(index, 1)
+      }
+    })
     this.loadNextPage()
   },
   beforeDestroy() {
@@ -79,6 +92,8 @@ export default {
     eventBus.bus.$off(eventBus.events.searchTag)
     eventBus.bus.$off(eventBus.events.searchText)
     eventBus.bus.$off(eventBus.events.itemSizeChanged)
+    eventBus.bus.$off(eventBus.events.newItemAdded)
+    eventBus.bus.$off(eventBus.events.itemRemoved)
   },
   data() {
     return  {
@@ -89,7 +104,7 @@ export default {
       // query parameters
       query: {
         page: 0,
-        size: 20,
+        size: 50,
         name: null,
         albumId: null,
         tagId: null,

@@ -1,12 +1,11 @@
 <template>
-  <div @mouseover="showTitle = true" @mouseleave="showTitle = false"
-       @click="openResource(resource.resourceId)"
+  <div @mouseover="showCover = true" @mouseleave="showCover = false"
        :style="`display: flex; width: ${itemWidth}px; height: ${itemHeight}px; position: relative;`">
 
     <template v-if="resource.status === 2">
       <el-image style="flex: 1 1 auto;" fit="cover" :src="resource[thumbnailConfig.thumbnailKey]">
-        <div slot="error" class="image-slot">
-          <i class="el-icon-picture-outline"></i>
+        <div slot="error" class="image-slot" style="width: 100%; height: 100%">
+          <img class="img-placeholder" src="../assets/pic-no-thumbnail.png" alt=""/>
         </div>
       </el-image>
     </template>
@@ -17,28 +16,44 @@
       <img class="img-placeholder" src="../assets/pic-download-failed.png" alt="downloading"/>
     </template>
 
-    <transition name="el-zoom-in-bottom">
-      <div class="wrapper-info" v-show="showTitle">
-        <span class="thumbnail-title">{{ resource.name }}</span>
+    <transition name="el-fade-in">
+      <div @click="this.handleClick" class="wrapper-info" v-show="showCover">
+        <div style="height: min-content; width: 100%; display: flex; flex-flow: row nowrap; gap: 8px; flex-grow: 0">
+          <span class="thumbnail-title">{{ resource.name }}</span>
+          <v-icon v-if="management" color="#ffffff" @click="this.handlePreview" dense>el-icon-zoom-in</v-icon>
+          <v-icon v-if="management" color="#ffffff" @click="this.handleCreateTag" dense>el-icon-price-tag</v-icon>
+          <v-icon v-if="management" color="#ffffff" @click="this.handleDelete" dense>el-icon-delete</v-icon>
+        </div>
         <div v-if="resource.tags.length !== 0" class="tag-container">
           <el-tag v-for="t in resource.tags" :key="`tag-${resource.resourceId}-${t.tagId}`"
-                  size="mini" effect="light" :type="getTagType(t)">
+                  size="mini" effect="light" :type="getTagType(t)" :closable="management" @close="deleteTag(t.rtId)">
             {{ getTagName(t.tagId) }}
           </el-tag>
         </div>
       </div>
     </transition>
+
+    <el-dialog :visible.sync="showOrigin.showDialog" :title="showOrigin.title">
+      <img width="100%" height="100%" :src="showOrigin.originUrl" alt="">
+    </el-dialog>
+
   </div>
 
 </template>
 
 <script>
 import configs from "@/configs";
+import apis from "@/apis";
+import eventBus from "@/eventBus";
 
 export default {
   name: "ImageCard",
   props: {
     resource: Object,
+    management: {
+      default: false,
+      type: Boolean
+    },
     sizeType: {
       default: 'medium',
       type: String
@@ -50,10 +65,53 @@ export default {
   },
   data() {
     return {
-      showTitle: false
+      showCover: false,
+      resourceData: this.resource,
+      showOrigin: {
+        title: '',
+        showDialog: false,
+        originUrl: ''
+      },
+
     }
   },
   methods: {
+    handleClick() {
+      if (!this.management) {
+        this.handlePreview()
+      }
+    },
+    handleCreateTag() {
+      console.log("handleCreateTag: ", this.resourceData.resourcdId)
+    },
+    handleDelete() {
+      let id = this.resourceData.resourceId
+      apis.removeResource(id)
+          .then(() => {
+            eventBus.bus.$emit(eventBus.events.itemRemoved, this.resourceData)
+          })
+          .finally(() => {})
+    },
+    handlePreview() {
+      console.log("open resource: ", this.resourceData)
+      if (this.isImage(this.resourceData.url)) {
+        this.showOrigin.title = this.resourceData.name
+        this.showOrigin.originUrl = this.resourceData.url;
+        this.showOrigin.showDialog = true;
+      } else {
+        let hostScheme = window.location.protocol + "//" + window.location.host;
+        window.open(hostScheme + this.resourceData.url, '_blank');
+      }
+    },
+    isImage(url) {
+      let imageExts = ["png", "jpg", "jpeg", "gif", "bmp"]
+      for (const ext of imageExts) {
+        if (url.endsWith(ext)) {
+          return true;
+        }
+      }
+      return false;
+    },
     getTagType(tag) {
       const colorType = ["", "success", "info", "warning", "danger"]
       return colorType[tag.tagId % 5]
@@ -61,8 +119,17 @@ export default {
     getTagName(tagId) {
       return this.$store.state.tagMap[tagId]
     },
-    openResource(resource) {
-      console.log("open resource: ", resource)
+    deleteTag(resourceTagId) {
+      apis.removeResourceTag(resourceTagId)
+          .then((payload) => {
+            if (payload.status === 0) {
+              let deletedIndex = this.resourceData.tags.findIndex((value) => {
+                return value.rtId === resourceTagId
+              })
+              this.resourceData.tags.splice(deletedIndex, 1)
+            }
+          })
+          .finally(() => {})
     }
   },
   computed: {
@@ -89,14 +156,13 @@ export default {
   display: flex;
   flex-flow: row wrap;
   position: absolute;
-  bottom: 0;
   width: 100%;
+  height: 100%;
   padding: 8px;
   background-color: rgba(0, 0, 0, 0.4);
 }
 
 .thumbnail-title {
-  width: 60%;
   font-size: 100%;
   text-align: left;
   text-overflow: ellipsis;
@@ -108,28 +174,22 @@ export default {
 }
 
 .tag-container {
-  width: 60%;
+  width: 100%;
   display: flex;
-  flex-flow: row nowrap;
-  justify-content: flex-end;
+  flex-flow: row-reverse wrap;
+  justify-content: right;
   gap: 4px;
   flex: 1 1 auto;
-  align-self: center;
-  flex-grow: 1;
-  flex-shrink: 1;
+  align-self: end;
   overflow-x: hidden;
 }
 
-.img-placeholder {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-}
 
-.more-options {
-  flex-grow: 1;
-  max-width: 24px;
-  aspect-ratio: 1 / 1;
+.img-placeholder {
+  object-fit: scale-down;
+  width: 100%;
+  height: 100%;
+  alignment: center
 }
 
 </style>

@@ -68,11 +68,32 @@ export default {
     async getAlbum(id) {
         return await instance.get("/public/api/album/" + id)
     },
+    async createAlbum(data) {
+        if (data.name === null || data.name === "") {
+            let errorMessage = "Album name cannot be empty!"
+            eventBus.bus.$emit(eventBus.events.showMessage, {
+                level: "error",
+                message: errorMessage
+            })
+            console.log(errorMessage)
+            return Promise.reject(errorMessage);
+        }
+        return await instance.post("/private/api/album", data)
+    },
     async getAlbums(data) {
         return await instance.get("/public/api/album?" + querystring.stringify(data))
     },
     async getTags(data) {
         return await instance.get("/public/api/tag?" + querystring.stringify(data))
+    },
+    async getResource(id) {
+        return await instance.get("/public/api/resource/" + id)
+    },
+    async removeResource(id) {
+        return await instance.delete("/private/api/resource/" + id)
+    },
+    async removeResourceTag(rtId) {
+        return await instance.delete("/private/api/resourceTag/" + rtId)
     },
     async getResources(data) {
         return await instance.get("/public/api/resource?" + querystring.stringify(data));
