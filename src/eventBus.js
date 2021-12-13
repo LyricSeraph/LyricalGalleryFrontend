@@ -9,6 +9,7 @@ const events = {
     itemSizeChanged: "item-size-changed", // params: size-type: string
     newItemAdded: "new-item-added", // params: { resource object }
     itemRemoved: "item-removed", // params: { resource object }
+    reloadItems: "reload-items", // no params
 }
 
 const bus = new Vue()

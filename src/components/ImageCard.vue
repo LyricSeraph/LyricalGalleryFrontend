@@ -2,14 +2,14 @@
   <div @mouseover="showCover = true" @mouseleave="showCover = false"
        :style="`display: flex; width: ${itemWidth}px; height: ${itemHeight}px; position: relative;`">
 
-    <template v-if="resource.status === 2">
-      <el-image style="flex: 1 1 auto;" fit="cover" :src="resource[thumbnailConfig.thumbnailKey]">
+    <template v-if="resourceData.status === 2">
+      <el-image style="flex: 1 1 auto;" fit="cover" :src="resourceData[thumbnailConfig.thumbnailKey]">
         <div slot="error" class="image-slot" style="width: 100%; height: 100%">
           <img class="img-placeholder" src="../assets/pic-no-thumbnail.png" alt=""/>
         </div>
       </el-image>
     </template>
-    <template v-else-if="resource.status === 0 || resource.status === 1">
+    <template v-else-if="resourceData.status === 0 || resourceData.status === 1">
       <img class="img-placeholder" src="../assets/pic-downloading.png" alt="downloading"/>
     </template>
     <template v-else>
@@ -19,13 +19,19 @@
     <transition name="el-fade-in">
       <div @click="this.handleClick" class="wrapper-info" v-show="showCover">
         <div style="height: min-content; width: 100%; display: flex; flex-flow: row nowrap; gap: 8px; flex-grow: 0">
-          <span class="thumbnail-title">{{ resource.name }}</span>
-          <v-icon v-if="management" color="#ffffff" @click="this.handlePreview" dense>el-icon-zoom-in</v-icon>
-          <v-icon v-if="management" color="#ffffff" @click="this.handleCreateTag" dense>el-icon-price-tag</v-icon>
-          <v-icon v-if="management" color="#ffffff" @click="this.handleDelete" dense>el-icon-delete</v-icon>
-        </div>
-        <div v-if="resource.tags.length !== 0" class="tag-container">
-          <el-tag v-for="t in resource.tags" :key="`tag-${resource.resourceId}-${t.tagId}`"
+          <span class="thumbnail-title">{{ resourceData.name }}</span>
+          <v-icon v-if="management" class="edit-operation" color="#ffffff"
+                  @click="operation.showRenameDialog = true" small>el-icon-edit</v-icon>
+          <v-icon v-if="management" class="edit-operation" color="#ffffff"
+                  @click="this.handlePreview" small>el-icon-zoom-in</v-icon>
+          <v-icon v-if="management" class="edit-operation" color="#ffffff"
+                  @click="this.handleCreateTag" small>el-icon-price-tag</v-icon>
+          <v-icon v-if="management" class="edit-operation" color="#ffffff"
+                  @click="operation.showConfirmDeleteDialog = true" small>el-icon-delete</v-icon>
+          </div>
+
+        <div v-if="resourceData.tags.length !== 0" class="tag-container">
+          <el-tag v-for="t in resourceData.tags" :key="`tag-${resourceData.resourceId}-${t.tagId}`"
                   size="mini" effect="light" :type="getTagType(t)" :closable="management" @close="deleteTag(t.rtId)">
             {{ getTagName(t.tagId) }}
           </el-tag>
@@ -37,6 +43,25 @@
       <img width="100%" height="100%" :src="showOrigin.originUrl" alt="">
     </el-dialog>
 
+    <el-dialog
+        :visible.sync="operation.showRenameDialog" title="Rename Image">
+      <div style="margin: 8px">
+        <p style="text-align: start">Renaming image:</p>
+        <p style="text-align: start"><span style="font-weight: 500">{{resourceData.name}}</span></p>
+      </div>
+      <div style="display: flex; flex-flow: column nowrap; gap: 10px">
+        <el-input placeholder="Please input name" v-model="operation.renameTo" />
+        <el-button type="primary" @click="handleRename" :loading="operation.loading">OK</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+        :visible.sync="operation.showConfirmDeleteDialog" title="Delete Image?">
+      <div style="display: flex; flex-flow: row nowrap; gap: 10px; justify-content: center">
+        <el-button type="primary" @click="operation.showConfirmDeleteDialog = false">Cancel</el-button>
+        <el-button type="danger" @click="handleDelete" :loading="operation.loading">Delete</el-button>
+      </div>
+    </el-dialog>
   </div>
 
 </template>
@@ -68,11 +93,16 @@ export default {
       showCover: false,
       resourceData: this.resource,
       showOrigin: {
-        title: '',
+        title: "",
         showDialog: false,
-        originUrl: ''
+        originUrl: ""
       },
-
+      operation: {
+        loading: false,
+        showRenameDialog: false,
+        renameTo: "",
+        showConfirmDeleteDialog: false,
+      }
     }
   },
   methods: {
@@ -85,22 +115,39 @@ export default {
       console.log("handleCreateTag: ", this.resourceData.resourcdId)
     },
     handleDelete() {
+      this.operation.loading = true
       let id = this.resourceData.resourceId
       apis.removeResource(id)
           .then(() => {
             eventBus.bus.$emit(eventBus.events.itemRemoved, this.resourceData)
           })
-          .finally(() => {})
+          .finally(() => {
+            this.operation.loading = false
+            this.operation.showConfirmDeleteDialog = false
+          })
+    },
+    handleRename() {
+      this.operation.showRenameDialog = true
+      apis.updateResource(this.resourceData.resourceId, {
+        albumId: this.resourceData.albumId,
+        name: this.operation.renameTo
+      }).then((payload) => {
+        this.resourceData = payload.data
+      }).finally(() => {
+        this.operation.loading = false
+        this.operation.showRenameDialog = false
+      })
     },
     handlePreview() {
-      console.log("open resource: ", this.resourceData)
-      if (this.isImage(this.resourceData.url)) {
-        this.showOrigin.title = this.resourceData.name
-        this.showOrigin.originUrl = this.resourceData.url;
-        this.showOrigin.showDialog = true;
-      } else {
-        let hostScheme = window.location.protocol + "//" + window.location.host;
-        window.open(hostScheme + this.resourceData.url, '_blank');
+      if (this.resourceData.status === 2) {
+        if (this.isImage(this.resourceData.url)) {
+          this.showOrigin.title = this.resourceData.name
+          this.showOrigin.originUrl = this.resourceData.url;
+          this.showOrigin.showDialog = true;
+        } else {
+          let hostScheme = window.location.protocol + "//" + window.location.host;
+          window.open(hostScheme + this.resourceData.url, '_blank');
+        }
       }
     },
     isImage(url) {
@@ -140,7 +187,7 @@ export default {
       return this.thumbnailConfig.displaySize
     },
     itemWidth() {
-      let calculatedWidth = this.itemHeight * this.resource.ratio
+      let calculatedWidth = this.itemHeight * this.resourceData.ratio
       if (calculatedWidth > this.maxWidth) {
         return this.maxWidth
       }
@@ -171,6 +218,10 @@ export default {
   color: white;
   max-lines: 1;
   flex: 1 1 auto;
+}
+
+.edit-operation {
+  flex: 0 1 auto;
 }
 
 .tag-container {

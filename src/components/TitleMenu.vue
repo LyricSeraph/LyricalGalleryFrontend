@@ -30,8 +30,8 @@
         :visible.sync="dialogVisible"
         width="300px">
       <div style="display: flex; flex-flow: column nowrap; gap: 10px">
-        <el-input placeholder="please input auth key" v-model="authKey" show-password></el-input>
-        <el-button type="primary" @click="onAuthKeyUpdated">确定</el-button>
+        <el-input placeholder="Please input auth key" v-model="authKey" show-password></el-input>
+        <el-button type="primary" @click="onAuthKeyUpdated">OK</el-button>
       </div>
     </el-dialog>
   </div>

@@ -4,6 +4,7 @@
     <v-icon @click="changeSize('large')" :color="getColor('large')">el-icon-picture</v-icon>
     <v-icon @click="changeSize('medium')" :color="getColor('medium')">el-icon-menu</v-icon>
     <v-icon @click="changeSize('small')" :color="getColor('small')">el-icon-s-grid</v-icon>
+    <v-icon @click="reloadItems">el-icon-refresh</v-icon>
   </el-divider>
 
 </template>
@@ -32,6 +33,9 @@ export default {
       this.$store.commit("saveThumbSize", sizeType)
       eventBus.bus.$emit(eventBus.events.itemSizeChanged, sizeType)
     },
+    reloadItems() {
+      eventBus.bus.$emit(eventBus.events.reloadItems)
+    }
   }
 }
 </script>

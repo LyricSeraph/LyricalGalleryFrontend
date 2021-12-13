@@ -30,7 +30,7 @@ instance.interceptors.response.use(function (response) {
     if (payload.status === null || payload.status !== 0) {
         eventBus.bus.$emit(eventBus.events.showMessage, {
             level: "error",
-            message: "Request failed, server error code: " + payload.status
+            message: "Request failed, server error: " + payload.message
         })
         throw "Server error"
     }
@@ -92,8 +92,14 @@ export default {
     async removeResource(id) {
         return await instance.delete("/private/api/resource/" + id)
     },
+    async updateResource(id, data) {
+        return await instance.put("/private/api/resource/" + id, data)
+    },
     async removeResourceTag(rtId) {
         return await instance.delete("/private/api/resourceTag/" + rtId)
+    },
+    async offlineDownload(data) {
+        return await instance.post("/private/api/resource/download", data)
     },
     async getResources(data) {
         return await instance.get("/public/api/resource?" + querystring.stringify(data));

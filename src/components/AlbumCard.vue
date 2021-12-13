@@ -3,12 +3,24 @@
     <div class="item-wrapper"
          @mouseover="showTitle = true" @mouseleave="showTitle = false">
       <div :style="wrapperStyle" @click="$emit('click')">
-        <el-image v-for="item in album.sampleResources" :key="`image-${album.albumId}-${item.resourceId}`"
-                   fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
-          <div slot="error" class="image-slot" style="width: 100%; height: 100%">
-            <img class="img-placeholder" src="../assets/pic-no-thumbnail.png" alt=""/>
-          </div>
-        </el-image>
+        <template v-for="item in album.sampleResources">
+          <template v-if="item.status === 2">
+            <el-image :key="`album${album.albumId}-${item.resourceId}`"
+                      fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
+              <div slot="error" class="image-slot" style="width: 100%; height: 100%">
+                <img class="img-placeholder" src="../assets/pic-no-thumbnail.png" alt=""/>
+              </div>
+            </el-image>
+          </template>
+          <template v-else-if="item.status === 0 || item.status === 1">
+            <img :key="`album${album.albumId}-${item.resourceId}`"
+                 class="img-placeholder" src="../assets/pic-downloading.png" alt="downloading"/>
+          </template>
+          <template v-else>
+            <img :key="`album${album.albumId}-${item.resourceId}`"
+                 class="img-placeholder" src="../assets/pic-download-failed.png" alt="downloading"/>
+          </template>
+        </template>
         <img v-if="album.sampleResources.length === 0" style="height: 100%; width: 100%; object-fit: contain" src="../assets/pic-album-empty.png" alt=""/>
       </div>
       <transition name="el-zoom-in-bottom">

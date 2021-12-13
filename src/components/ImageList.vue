@@ -84,6 +84,10 @@ export default {
         this.contents.splice(index, 1)
       }
     })
+    eventBus.bus.$on(eventBus.events.reloadItems, () => {
+      this.query.page = 0
+      this.loadNextPage()
+    })
     this.loadNextPage()
   },
   beforeDestroy() {
@@ -94,6 +98,7 @@ export default {
     eventBus.bus.$off(eventBus.events.itemSizeChanged)
     eventBus.bus.$off(eventBus.events.newItemAdded)
     eventBus.bus.$off(eventBus.events.itemRemoved)
+    eventBus.bus.$off(eventBus.events.reloadItems)
   },
   data() {
     return  {
@@ -104,7 +109,7 @@ export default {
       // query parameters
       query: {
         page: 0,
-        size: 50,
+        size: 30,
         name: null,
         albumId: null,
         tagId: null,
@@ -125,6 +130,9 @@ export default {
       }
       this.loading = true
       apis.getResources({...this.query, albumId: this.albumId }).then((payload) => {
+        if (this.query.page === 0) {
+          this.contents = []
+        }
         this.contents.push(...payload.data.content)
         this.query.page++
         this.last = payload.data.last

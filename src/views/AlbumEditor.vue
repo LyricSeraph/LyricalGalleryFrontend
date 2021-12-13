@@ -40,7 +40,20 @@
           placeholder="Input urls to download, one per row."
           v-model="offlineDownload.urlsText">
       </el-input>
-      <el-button type="primary" style="margin-top: 16px; width: 100%" @click="startOfflineDownload">Start Download</el-button>
+      <el-button type="primary" style="margin-top: 16px; width: 100%" @click="startOfflineDownload"
+                 :loading="offlineDownload.loading">Start Download</el-button>
+      <div v-if="offlineDownload.failedUrls.length > 0"
+           style="margin-top: 16px">
+        <p style="display: flex; text-align: start;">
+          <span>Failed upload records:&nbsp;</span>
+          <el-link type="primary" @click="offlineDownload.failedUrls=[]">(Clear)</el-link>
+        </p>
+        <p v-for="(url, index) in offlineDownload.failedUrls"
+           :key="`failed-url-${index}`"
+           style="text-align: start">
+          {{ url }}
+        </p>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -93,8 +106,10 @@ export default {
         showDialog: false,
       },
       offlineDownload: {
+        loading: false,
         urlsText: "",
-        showDialog: false
+        showDialog: false,
+        failedUrls: []
       }
     }
   },
@@ -128,15 +143,34 @@ export default {
       this.uploadPreview.imageUrl = file.url;
       this.uploadPreview.showDialog = true;
     },
-    handleUploadSuccess(response, file, fileList) {
-      console.log("handleUploadSuccess: ", response, file, fileList)
+    handleUploadSuccess(response) {
       this.albumData.albumSize++
       eventBus.bus.$emit(eventBus.events.newItemAdded, response.data)
     },
-    startOfflineDownload() {
-      console.log("startOfflineDownload: ")
-    }
+    async startOfflineDownload() {
+      console.log("startOfflineDownload: ", this.offlineDownload.urlsText)
+      this.offlineDownload.loading = true
+      let lines = this.offlineDownload.urlsText.split('\n')
 
+      let promises = [];
+      for (const line of lines) {
+        promises.push(apis.offlineDownload({ url: line, albumId: this.albumData.albumId }))
+      }
+      promises = promises.map(p => p.catch(() => null));
+      let results = await Promise.all(promises);
+      for (let i = 0; i < results.length; i++) {
+        if (results[i] === null) {
+          this.offlineDownload.failedUrls.push(lines[i])
+        } else {
+          eventBus.bus.$emit(eventBus.events.newItemAdded, results[i].data)
+        }
+      }
+      this.offlineDownload.loading = false
+      if (this.offlineDownload.failedUrls.length === 0) {
+        this.offlineDownload.showDialog = false
+
+      }
+    }
   },
   computed: {
     thumbnailConfig() {
