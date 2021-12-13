@@ -25,14 +25,14 @@
           <v-icon v-if="management" class="edit-operation" color="#ffffff"
                   @click="this.handlePreview" small>el-icon-zoom-in</v-icon>
           <v-icon v-if="management" class="edit-operation" color="#ffffff"
-                  @click="this.handleCreateTag" small>el-icon-price-tag</v-icon>
+                  @click="this.handleEditTag" small>el-icon-price-tag</v-icon>
           <v-icon v-if="management" class="edit-operation" color="#ffffff"
                   @click="operation.showConfirmDeleteDialog = true" small>el-icon-delete</v-icon>
           </div>
 
         <div v-if="resourceData.tags.length !== 0" class="tag-container">
           <el-tag v-for="t in resourceData.tags" :key="`tag-${resourceData.resourceId}-${t.tagId}`"
-                  size="mini" effect="light" :type="getTagType(t)" :closable="management" @close="deleteTag(t.rtId)">
+                  size="mini" effect="light" :type="getTagType(t.tagId)" :closable="management" @close="removeTag(t.resourceId, t.tagId)">
             {{ getTagName(t.tagId) }}
           </el-tag>
         </div>
@@ -50,7 +50,7 @@
         <p style="text-align: start"><span style="font-weight: 500">{{resourceData.name}}</span></p>
       </div>
       <div style="display: flex; flex-flow: column nowrap; gap: 10px">
-        <el-input placeholder="Please input name" v-model="operation.renameTo" />
+        <el-input placeholder="Please input name" v-model="operation.renameTo" @keyup.enter.native="handleRename" />
         <el-button type="primary" @click="handleRename" :loading="operation.loading">OK</el-button>
       </div>
     </el-dialog>
@@ -62,7 +62,21 @@
         <el-button type="danger" @click="handleDelete" :loading="operation.loading">Delete</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog
+        :visible.sync="operation.showEditTagDialog" title="Edit Tag">
+      <template v-if="operation.showEditTagDialog">
+        <div style="display:flex; flex-flow: row wrap; gap: 10px; margin-top: 16px">
+          <el-tag v-for="(name, tagId) in this.tagMap" :key="`tag-${tagId}`" style="cursor: pointer"
+                  :type="getTagType(tagId)" :effect="getTagEffect(tagId)" @click="toggleSelectedTag(tagId)">
+            {{name}}
+          </el-tag>
+        </div>
+      </template>
+    </el-dialog>
+
   </div>
+
 
 </template>
 
@@ -102,6 +116,7 @@ export default {
         showRenameDialog: false,
         renameTo: "",
         showConfirmDeleteDialog: false,
+        showEditTagDialog: false,
       }
     }
   },
@@ -111,8 +126,9 @@ export default {
         this.handlePreview()
       }
     },
-    handleCreateTag() {
-      console.log("handleCreateTag: ", this.resourceData.resourcdId)
+    handleEditTag() {
+      this.operation.showEditTagDialog = true
+      console.log("handleEditTag: ")
     },
     handleDelete() {
       this.operation.loading = true
@@ -150,6 +166,13 @@ export default {
         }
       }
     },
+    toggleSelectedTag(tagId) {
+      if (this.hasTag(tagId)) {
+        this.removeTag(this.resourceData.resourceId, tagId)
+      } else {
+        this.addTag(this.resourceData.resourceId, tagId)
+      }
+    },
     isImage(url) {
       let imageExts = ["png", "jpg", "jpeg", "gif", "bmp"]
       for (const ext of imageExts) {
@@ -159,24 +182,43 @@ export default {
       }
       return false;
     },
-    getTagType(tag) {
+    hasTag(tagId) {
+      for (let t of this.resourceData.tags) {
+        if (t.tagId.toString() === tagId) {
+          return true
+        }
+      }
+      return false
+    },
+    getTagType(tagId) {
       const colorType = ["", "success", "info", "warning", "danger"]
-      return colorType[tag.tagId % 5]
+      return colorType[tagId % 5]
+    },
+    getTagEffect(tagId) {
+      if (this.hasTag(tagId)) {
+        return "dark"
+      } else {
+        return "light"
+      }
     },
     getTagName(tagId) {
       return this.$store.state.tagMap[tagId]
     },
-    deleteTag(resourceTagId) {
-      apis.removeResourceTag(resourceTagId)
-          .then((payload) => {
-            if (payload.status === 0) {
-              let deletedIndex = this.resourceData.tags.findIndex((value) => {
-                return value.rtId === resourceTagId
-              })
-              this.resourceData.tags.splice(deletedIndex, 1)
-            }
-          })
-          .finally(() => {})
+    addTag(resourceId, tagId) {
+      apis.addResourceTag(resourceId, tagId)
+          .then(() => {
+            this.resourceData.tags.unshift({resourceId, tagId})
+          }).finally(() => {})
+    },
+    removeTag(resourceId, tagId) {
+      apis.removeResourceTag(resourceId, tagId)
+          .then(() => {
+            let deletedIndex = this.resourceData.tags.findIndex((value) => {
+              return value.resourceId === resourceId &&
+                  value.tagId === tagId
+            })
+            this.resourceData.tags.splice(deletedIndex, 1)
+          }).finally(() => {})
     }
   },
   computed: {
@@ -193,6 +235,9 @@ export default {
       }
       return calculatedWidth
     },
+    tagMap() {
+      return this.$store.state.tagMap
+    }
   }
 }
 </script>
@@ -206,6 +251,7 @@ export default {
   width: 100%;
   height: 100%;
   padding: 8px;
+  overflow-y: hidden;
   background-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -233,6 +279,7 @@ export default {
   flex: 1 1 auto;
   align-self: end;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 

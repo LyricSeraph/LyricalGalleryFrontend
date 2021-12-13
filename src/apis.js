@@ -95,8 +95,20 @@ export default {
     async updateResource(id, data) {
         return await instance.put("/private/api/resource/" + id, data)
     },
-    async removeResourceTag(rtId) {
-        return await instance.delete("/private/api/resourceTag/" + rtId)
+    async createTag(data) {
+        return await instance.post("/private/api/tag", data)
+    },
+    async deleteTag(id) {
+        return await instance.delete("/private/api/tag/" + id)
+    },
+    async updateTag(id, data) {
+        return await instance.put("/private/api/tag/" + id, data)
+    },
+    async addResourceTag(resourceId, tagId) {
+        return await instance.post("/private/api/resource/" + resourceId + "/tag/" + tagId)
+    },
+    async removeResourceTag(resourceId, tagId) {
+        return await instance.delete("/private/api/resource/" + resourceId + "/tag/" + tagId)
     },
     async offlineDownload(data) {
         return await instance.post("/private/api/resource/download", data)

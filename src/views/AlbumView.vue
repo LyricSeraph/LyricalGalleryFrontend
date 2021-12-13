@@ -1,7 +1,9 @@
 <template>
   <div ref="frameContainer" :style="`display: flex; flex-flow: row-reverse ${wrapState}; gap: 24px;`">
     <div :style="`width: ${sideMenuWidth}; min-width: 240px`">
-      <TagList :album-id="parseInt(this.$route.params.albumId)"/>
+      <el-card shadow="never">
+        <TagList :album-id="parseInt(this.$route.params.albumId)"/>
+      </el-card>
     </div>
     <div style="flex: 1 1 auto">
       <el-card shadow="never">

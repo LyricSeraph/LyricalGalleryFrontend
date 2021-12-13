@@ -35,6 +35,11 @@ export default new VueRouter({
             component: Views.AlbumEditor
         },
         {
+            path: "/management/tags",
+            name: "management tags",
+            component: Views.TagManagement
+        },
+        {
             path: "*",
             redirect: "/home"
         }

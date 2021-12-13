@@ -1,6 +1,6 @@
 <template>
-  <el-card shadow="never">
-    <span style="font-size: 24px">Available Tags</span>
+  <div style="display: flex; flex-flow: column nowrap;" >
+    <span style="font-size: 24px">Available Tags <v-icon @click="loadTags">el-icon-refresh</v-icon></span>
     <div style="display:flex; flex-flow: row wrap; gap: 10px; margin-top: 16px">
       <el-tag v-for="t in tags" :key="t.tagId" style="cursor: pointer"
               :type="getTagType(t)"
@@ -9,7 +9,7 @@
         {{t.name}}
       </el-tag>
     </div>
-  </el-card>
+  </div>
 </template>
 
 <script>

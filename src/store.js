@@ -18,9 +18,28 @@ export default new Vuex.Store({
             state.thumbnailSizeType = sizeType
         },
         saveTags(state, tags) {
+            let newTagMap = {}
             for (let i = 0; i < tags.length; i++) {
                 let t = tags[i]
-                state.tagMap[t.tagId] = t.name
+                newTagMap[t.tagId] = t.name
+            }
+            state.tagMap = newTagMap
+        },
+        newTag(state, tag) {
+            state.tagMap = {
+                ...state.tagMap,
+                [tag.tagId]: tag.name
+            }
+        },
+        deleteTag(state, tagId) {
+            let newTagMap = { ...state.tagMap }
+            delete newTagMap[tagId]
+            state.tagMap = newTagMap
+        },
+        updateTag(state, tag) {
+            state.tagMap = {
+                ...state.tagMap,
+                [tag.tagId]: tag.name
             }
         },
         setAuthKey (state, key) {

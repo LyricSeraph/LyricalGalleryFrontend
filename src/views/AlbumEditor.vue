@@ -27,7 +27,9 @@
       </el-card>
     </div>
     <div :style="`width: ${sideMenuWidth}; min-width: 240px`">
-      <TagList :album-id="parseInt(this.$route.params.albumId)"/>
+      <el-card shadow="never">
+        <TagList :album-id="parseInt(this.$route.params.albumId)"/>
+      </el-card>
     </div>
     <el-dialog :visible.sync="uploadPreview.showDialog">
       <img width="100%" :src="uploadPreview.imageUrl" alt="">
