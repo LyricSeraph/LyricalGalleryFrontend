@@ -6,7 +6,7 @@
           <v-img max-height="60" max-width="200" :src="`${publicPath}/assets/logo.png`" alt=""/>
         </a>
       </el-menu-item>
-      <el-menu-item index="/home">Latest</el-menu-item>
+      <el-menu-item index="/">Home</el-menu-item>
       <el-menu-item index="/albums">Album</el-menu-item>
       <el-submenu index="/management">
         <template slot="title">Management</template>
@@ -49,8 +49,8 @@ export default {
   data() {
     return {
       publicPath: process.env.BASE_URL,
-      currentActive: "/home",
-      supportedPath: ["/home", "/albums", "/management/albums", "/management/tags"],
+      currentActive: "/",
+      supportedPath: ["/", "/albums", "/management/albums", "/management/tags"],
       textToSearch: "",
       authKey: "",
       dialogVisible: false,

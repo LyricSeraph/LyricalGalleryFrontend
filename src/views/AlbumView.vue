@@ -8,7 +8,7 @@
     <div style="flex: 1 1 auto">
       <el-card shadow="never">
         <el-breadcrumb separator="/">
-          <el-breadcrumb-item :to="{ path: '/home' }">Home</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/' }">Home</el-breadcrumb-item>
           <el-breadcrumb-item :to="{ path: '/albums' }">Albums</el-breadcrumb-item>
           <el-breadcrumb-item>{{ albumData.name }} ({{ albumData.albumSize }})</el-breadcrumb-item>
         </el-breadcrumb>

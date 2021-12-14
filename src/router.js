@@ -6,11 +6,11 @@ Vue.use(VueRouter)
 
 export default new VueRouter({
     mode: "history",
-    base: "",
+    base: "gallery",
     scrollBehavior: () => ({y: 0}),
     routes: [
         {
-            path: "/home",
+            path: "/",
             name: "home",
             component: Views.Resources
         },
@@ -41,7 +41,7 @@ export default new VueRouter({
         },
         {
             path: "*",
-            redirect: "/home"
+            redirect: "/"
         }
     ]
 })

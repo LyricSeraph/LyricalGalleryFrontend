@@ -2,7 +2,7 @@
   <el-card shadow="never">
     <div style="display: flex; flex-flow: column nowrap; ">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item :to="{ path: '/home' }">Home</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/' }">Home</el-breadcrumb-item>
         <el-breadcrumb-item>Album Management</el-breadcrumb-item>
       </el-breadcrumb>
       <AlbumList :management="true" />

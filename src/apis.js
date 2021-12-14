@@ -55,18 +55,12 @@ instance.interceptors.response.use(function (response) {
     return Promise.reject(error);
 });
 
-let baseUrl = ""
-if (process.env.NODE_ENV === "development") {
-    baseUrl = "http://localhost"
-}
-
 export default {
-    baseUrl,
     async checkAuthKey() {
-        return await instance.get("/private/api/verification")
+        return await instance.get("/api/private/verification")
     },
     async getAlbum(id) {
-        return await instance.get("/public/api/album/" + id)
+        return await instance.get("/api/public/album/" + id)
     },
     async createAlbum(data) {
         if (data.name === null || data.name === "") {
@@ -78,42 +72,42 @@ export default {
             console.log(errorMessage)
             return Promise.reject(errorMessage);
         }
-        return await instance.post("/private/api/album", data)
+        return await instance.post("/api/private/album", data)
     },
     async getAlbums(data) {
-        return await instance.get("/public/api/album?" + querystring.stringify(data))
+        return await instance.get("/api/public/album?" + querystring.stringify(data))
     },
     async getTags(data) {
-        return await instance.get("/public/api/tag?" + querystring.stringify(data))
+        return await instance.get("/api/public/tag?" + querystring.stringify(data))
     },
     async getResource(id) {
-        return await instance.get("/public/api/resource/" + id)
+        return await instance.get("/api/public/resource/" + id)
     },
     async removeResource(id) {
-        return await instance.delete("/private/api/resource/" + id)
+        return await instance.delete("/api/private/resource/" + id)
     },
     async updateResource(id, data) {
-        return await instance.put("/private/api/resource/" + id, data)
+        return await instance.put("/api/private/resource/" + id, data)
     },
     async createTag(data) {
-        return await instance.post("/private/api/tag", data)
+        return await instance.post("/api/private/tag", data)
     },
     async deleteTag(id) {
-        return await instance.delete("/private/api/tag/" + id)
+        return await instance.delete("/api/private/tag/" + id)
     },
     async updateTag(id, data) {
-        return await instance.put("/private/api/tag/" + id, data)
+        return await instance.put("/api/private/tag/" + id, data)
     },
     async addResourceTag(resourceId, tagId) {
-        return await instance.post("/private/api/resource/" + resourceId + "/tag/" + tagId)
+        return await instance.post("/api/private/resource/" + resourceId + "/tag/" + tagId)
     },
     async removeResourceTag(resourceId, tagId) {
-        return await instance.delete("/private/api/resource/" + resourceId + "/tag/" + tagId)
+        return await instance.delete("/api/private/resource/" + resourceId + "/tag/" + tagId)
     },
     async offlineDownload(data) {
-        return await instance.post("/private/api/resource/download", data)
+        return await instance.post("/api/private/resource/download", data)
     },
     async getResources(data) {
-        return await instance.get("/public/api/resource?" + querystring.stringify(data));
+        return await instance.get("/api/public/resource?" + querystring.stringify(data));
     }
 }
