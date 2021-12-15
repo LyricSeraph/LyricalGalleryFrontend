@@ -37,7 +37,6 @@ export default {
   methods: {
     screenSizeChanged() {
       let windowWidth = this.$refs.app.clientWidth
-      console.log("screenSizeChanged size: ", windowWidth)
       eventBus.bus.$emit(eventBus.events.screenSizeChanged, windowWidth)
     },
     onScroll ({ target: { scrollTop, clientHeight, scrollHeight }}) {

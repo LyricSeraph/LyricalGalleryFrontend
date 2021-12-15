@@ -1,10 +1,12 @@
 
+
 module.exports = {
   // options...
   devServer: {
+    hot: true,
     proxy: 'http://localhost:80',
   },
-  publicPath: process.env.NODE_ENV === 'production' ? '/static/dist' : '',
+  publicPath: '/static/dist',
   transpileDependencies: [
     'vuetify'
   ]

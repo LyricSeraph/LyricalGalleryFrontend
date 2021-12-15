@@ -113,6 +113,7 @@ export default {
         this.loadNextPage()
       }).finally(() => {
         this.loadingForCreate = false
+        this.newAlbumData.name = ""
       })
     },
     loadNextPage() {
