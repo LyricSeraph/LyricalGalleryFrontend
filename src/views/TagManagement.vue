@@ -106,7 +106,7 @@ export default {
   },
   methods: {
     loadTags() {
-      apis.getTags({}).then((payload) => {
+      apis.getTags({ignoreAlbum: true}).then((payload) => {
         this.$store.commit("saveTags", payload.data)
       })
     },

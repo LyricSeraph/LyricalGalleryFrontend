@@ -5,8 +5,26 @@
         <el-breadcrumb separator="/">
           <el-breadcrumb-item :to="{ path: '/' }">Home</el-breadcrumb-item>
           <el-breadcrumb-item :to="{ path: '/management/albums' }">Management Albums</el-breadcrumb-item>
-          <el-breadcrumb-item>{{ albumData.name }} ({{ albumData.albumSize }})</el-breadcrumb-item>
+          <template v-for="item in parents">
+            <el-breadcrumb-item :key="'breadcrumb-' + item.albumId" :to="{ name: 'album-editor', params: { albumId: item.albumId } }">
+              {{ item.name }}
+            </el-breadcrumb-item>
+          </template>
+          <el-breadcrumb-item>{{ albumData.name }} ({{ albumData.subAlbumCount }} + {{ albumData.albumSize }})</el-breadcrumb-item>
         </el-breadcrumb>
+
+        <ThumbSizeSelector />
+
+        <el-divider content-position="left">
+          <span>Albums</span>
+        </el-divider>
+
+        <AlbumList :album-id="albumId" :management="true" />
+
+        <el-divider content-position="left">
+          <span>Items</span>
+        </el-divider>
+
         <div style="padding:16px; display: flex; flex-flow: column nowrap; gap: 16px; justify-content: space-around">
           <p>Upload New Files <span style="font-weight: bold">or </span>
             <el-link type="primary" @click="offlineDownload.showDialog = true">
@@ -15,20 +33,21 @@
           </p>
           <el-upload
               style="flex: 1 1 auto"
-              :action="`/private/api/resource/upload?album=${albumData.albumId}`"
-              list-type="picture-card"
-              :on-preview="handlePictureCardPreview"
-              :on-remove="handleRemove"
+              :action="`/api/private/resource/upload?album=${albumId}`"
+              drag
+              list-type="fileList"
+              :file-list="uploadFileList"
               :on-success="handleUploadSuccess" multiple>
-            <i class="el-icon-plus"></i>
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">Drag files here，or <em>click upload</em></div>
           </el-upload>
         </div>
-        <ImageList :query-abnormal-state="true" :album-id="parseInt(this.$route.params.albumId)" :management="true"/>
+        <ImageList :query-abnormal-state="true" :album-id="albumId" :management="true"/>
       </el-card>
     </div>
     <div :style="`width: ${sideMenuWidth}; min-width: 240px`">
       <el-card shadow="never">
-        <TagList :album-id="parseInt(this.$route.params.albumId)"/>
+        <TagList :album-id="albumId"/>
       </el-card>
     </div>
     <el-dialog :visible.sync="uploadPreview.showDialog">
@@ -66,9 +85,11 @@ import TagList from "@/components/TagList";
 import ImageList from "@/components/ImageList";
 import apis from "@/apis";
 import configs from "@/configs";
+import ThumbSizeSelector from "@/components/ThumbSizeSelector";
+import AlbumList from "@/components/AlbumList";
 export default {
   name: "AlbumEditor",
-  components: {ImageList, TagList},
+  components: {AlbumList, ThumbSizeSelector, ImageList, TagList},
   mounted() {
     this.updateLayoutStyle(this.$refs.frameContainer.clientWidth)
     eventBus.bus.$on(eventBus.events.screenSizeChanged, () => {
@@ -83,6 +104,12 @@ export default {
     eventBus.bus.$on(eventBus.events.itemRemoved, () => {
       this.albumData.albumSize--
     })
+    eventBus.bus.$on(eventBus.events.albumRemoved, () => {
+      this.albumData.subAlbumCount--
+    })
+    eventBus.bus.$on(eventBus.events.newAlbumAdded, () => {
+      this.albumData.subAlbumCount++
+    })
     this.loadAlbum()
   },
   beforeDestroy() {
@@ -90,6 +117,8 @@ export default {
     eventBus.bus.$off(eventBus.events.itemSizeChanged)
     eventBus.bus.$off(eventBus.events.newItemAdded)
     eventBus.bus.$off(eventBus.events.itemRemoved)
+    eventBus.bus.$off(eventBus.events.albumRemoved)
+    eventBus.bus.$off(eventBus.events.newAlbumAdded)
   },
   data() {
     return {
@@ -97,12 +126,15 @@ export default {
       wrapState: "nowrap",
       sideMenuWidth: "240px",
       albumData: {
-        albumId: null,
         name: "",
+        parent: null,
         albumSize: 0,
+        subAlbumCount: 0,
       },
+      parents: [],
       albumLoading: false,
 
+      uploadFileList: [],
       uploadPreview: {
         imageUrl: "",
         showDialog: false,
@@ -127,26 +159,20 @@ export default {
     },
     loadAlbum() {
       this.albumLoading = true
-      apis.getAlbum(this.$route.params.albumId).then((payload) => {
+      apis.getAlbum(this.albumId).then((payload) => {
         this.albumData = payload.data
+        this.parents = []
+        let current = this.albumData.parent
+        while (current !== null) {
+          this.parents.push(current)
+          current = current.parent
+        }
+        this.parents.reverse()
       }).finally(() => {
         this.albumLoading = false
       })
     },
-    handleRemove(file) {
-      let id = file.response.data.resourceId
-      apis.removeResource(id)
-          .then(() => {
-            eventBus.bus.$emit(eventBus.events.itemRemoved, file.response.data)
-          })
-          .finally(() => {})
-    },
-    handlePictureCardPreview(file) {
-      this.uploadPreview.imageUrl = file.url;
-      this.uploadPreview.showDialog = true;
-    },
     handleUploadSuccess(response) {
-      this.albumData.albumSize++
       eventBus.bus.$emit(eventBus.events.newItemAdded, response.data)
     },
     async startOfflineDownload() {
@@ -156,7 +182,7 @@ export default {
 
       let promises = [];
       for (const line of lines) {
-        promises.push(apis.offlineDownload({ url: line, albumId: this.albumData.albumId }))
+        promises.push(apis.offlineDownload({ url: line, albumId: this.albumId }))
       }
       promises = promises.map(p => p.catch(() => null));
       let results = await Promise.all(promises);
@@ -178,6 +204,15 @@ export default {
     thumbnailConfig() {
       return configs.thumbnailConfig[this.sizeType]
     },
+    albumId() {
+      return parseInt(this.$route.params.albumId)
+    }
+  },
+  watch: {
+    albumId() {
+      this.uploadFileList = []
+      this.loadAlbum()
+    }
   }
 }
 </script>

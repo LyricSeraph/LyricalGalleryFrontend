@@ -56,7 +56,7 @@
     </el-dialog>
 
     <el-dialog
-        :visible.sync="operation.showConfirmDeleteDialog" title="Delete Image?">
+        :visible.sync="operation.showConfirmDeleteDialog" title="Delete Item?">
       <div style="display: flex; flex-flow: row nowrap; gap: 10px; justify-content: center">
         <el-button type="primary" @click="operation.showConfirmDeleteDialog = false">Cancel</el-button>
         <el-button type="danger" @click="handleDelete" :loading="operation.loading">Delete</el-button>

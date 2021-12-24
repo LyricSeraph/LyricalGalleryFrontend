@@ -26,17 +26,22 @@ export default new VueRouter({
         },
         {
             path: "/management/albums",
-            name: "management albums",
+            name: "management-albums",
             component: Views.AlbumManagement
         },
         {
+            path: "/management/recycle-bin",
+            name: "recycle-bin",
+            component: Views.RecycleBin
+        },
+        {
             path: "/management/album/:albumId",
-            name: "album editor",
+            name: "album-editor",
             component: Views.AlbumEditor
         },
         {
             path: "/management/tags",
-            name: "management tags",
+            name: "management-tags",
             component: Views.TagManagement
         },
         {

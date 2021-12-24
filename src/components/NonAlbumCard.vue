@@ -1,11 +1,11 @@
 <template>
-  <el-card>
+  <el-card v-if="page.totalElements > 0">
     <div class="item-wrapper"
          @mouseover="showTitle = true" @mouseleave="showTitle = false">
       <div :style="wrapperStyle" @click="$emit('click')">
-        <template v-for="item in album.sampleResources">
+        <template v-for="item in page.content">
           <template v-if="item.status === 2">
-            <el-image :key="`album${album.albumId}-${item.resourceId}`"
+            <el-image :key="`non-album-${item.resourceId}`"
                       fit="cover" :src="item[thumbnailConfig.thumbnailKey]">
               <div slot="error" class="image-slot" style="width: 100%; height: 100%">
                 <img class="img-placeholder" :src="`${publicPath}/assets/pic-no-thumbnail.png`" alt=""/>
@@ -13,41 +13,23 @@
             </el-image>
           </template>
           <template v-else-if="item.status === 0 || item.status === 1">
-            <img :key="`album${album.albumId}-${item.resourceId}`"
+            <img :key="`non-album-${item.resourceId}`"
                  class="img-placeholder" :src="`${publicPath}/assets/pic-downloading.png`" alt="downloading"/>
           </template>
           <template v-else>
-            <img :key="`album${album.albumId}-${item.resourceId}`"
+            <img :key="`non-album-${item.resourceId}`"
                  class="img-placeholder" :src="`${publicPath}/assets/pic-download-failed.png`" alt="downloading"/>
           </template>
         </template>
-        <img v-if="album.sampleResources.length === 0" style="height: 100%; width: 100%; object-fit: contain" :src="`${publicPath}/assets/pic-album-empty.png`" alt=""/>
+        <img v-if="page.content.length === 0" style="height: 100%; width: 100%; object-fit: contain" :src="`${publicPath}/assets/pic-no-data.png`" alt=""/>
       </div>
       <transition name="el-zoom-in-bottom">
         <div class="wrapper-info" v-show="showTitle">
-          <span class="album-title">{{ album.name }}</span>
-          <span class="album-count">{{ album.subAlbumCount }}&nbsp;<i class="el-icon-collection"/></span>
-          <span class="album-count">{{ album.albumSize }}&nbsp;<i class="el-icon-picture-outline"/></span>
-          <span v-if="deletable" style="font-size: 80%; color: white; flex-grow: 1; cursor: pointer">
-            <i class="el-icon-delete" @click="confirmDeleteAlbum(album)"/>
-          </span>
+          <span class="album-title">Recycle bin</span>
+          <span class="album-count">{{ page.totalElements }}&nbsp;<i class="el-icon-picture-outline"/></span>
         </div>
       </transition>
     </div>
-
-    <el-dialog
-        :visible.sync="operation.showDeleteDialog" title="Delete Album?">
-      <div style="margin: 8px">
-        <p style="text-align: start">Deleting album: <span style="font-weight: 500">{{operation.albumName}}</span></p>
-        <p style="text-align: start">All items directly inside will be moved to <el-link type="danger" style="font-size: 18px">RECYCLE BIN</el-link></p>
-        <p style="text-align: start">All sub-albums inside will be move to <el-link type="primary" style="font-size: 18px">TOP LEVEL</el-link></p>
-
-      </div>
-      <div style="display: flex; flex-flow: row nowrap; gap: 10px; justify-content: center">
-        <el-button type="primary" @click="operation.showDeleteDialog = false">Cancel</el-button>
-        <el-button type="danger" @click="handleDelete" :loading="operation.loading">Delete</el-button>
-      </div>
-    </el-dialog>
 
   </el-card>
 </template>
@@ -58,9 +40,8 @@ import apis from "@/apis";
 import eventBus from "@/eventBus";
 
 export default {
-  name: "AlbumCard",
+  name: "NonAlbumCard",
   props: {
-    album: Object,
     sizeType: {
       default: 'medium',
       type: String
@@ -68,51 +49,49 @@ export default {
     maxWidth: {
       default: 512,
       type: Number
-    },
-    deletable: {
-      default: false,
-      type: Boolean
     }
   },
   data() {
     return {
+      page: {
+        content: [],
+        totalElements: 0,
+      },
       publicPath: process.env.BASE_URL,
       showTitle: false,
-      operation: {
-        albumName: '',
-        showDeleteDialog: false,
-        loading: false
-      }
     }
   },
+  created() {
+    eventBus.bus.$on(eventBus.events.reloadItems, () => {
+      this.loadSampleData()
+    })
+  },
+  destroyed() {
+    eventBus.bus.$off(eventBus.events.reloadItems)
+  },
+  mounted() {
+    this.loadSampleData()
+  },
   methods: {
-    confirmDeleteAlbum(album) {
-      this.operation.albumName = album.name
-      this.operation.showDeleteDialog = true
+    loadSampleData() {
+      apis.getResources({...this.query, albumId: this.thisId }).then((payload) => {
+        this.page = payload.data
+      }).finally(() => {})
     },
-    handleDelete() {
-      this.operation.loading = true
-      apis.deleteAlbum(this.album.albumId).then(() => {
-        this.operation.showDeleteDialog = false
-        eventBus.bus.$emit(eventBus.events.albumRemoved, this.album)
-      }).finally(() => {
-        this.operation.loading = false
-      })
-    }
   },
   computed: {
     thumbnailConfig() {
       return configs.thumbnailConfig[this.sizeType]
     },
     thumbnailEdge() {
-      if (this.album.sampleResources.length > 1) {
+      if (this.page.content.length > 1) {
         return 2
       } else {
         return 1
       }
     },
     thumbnailSize() {
-        return this.thumbnailConfig.displaySize / this.thumbnailEdge
+      return this.thumbnailConfig.displaySize / this.thumbnailEdge
     },
     wrapperStyle() {
       let edge = this.thumbnailEdge

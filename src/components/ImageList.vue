@@ -1,6 +1,5 @@
 <template>
     <div style="display: flex; flex-flow: column nowrap">
-      <ThumbSizeSelector v-if="contents.length !== 0" />
       <div ref="imageContainer" style="display:flex; flex-flow: row wrap; padding: 0; gap: 10px">
         <ImageCard v-for="item in contents" :key="`resource-${item.resourceId}`"
                    :resource="item" :size-type="sizeType" :management="management"
@@ -9,7 +8,7 @@
         <el-button type="primary" v-show="!last" plain :loading="loading" style="width: 100%" @click="loadNextPage()">Next Page</el-button>
       </div>
       <div class="empty-view" v-if="last && contents.length === 0">
-        <img  :src="`${publicPath}/assets/pic-album-empty.png`" alt="empty-album"/>
+        <img style="width: 384px; height: 384px; object-fit: cover" :src="`${publicPath}/assets/pic-no-data.png`" alt="empty-album"/>
         <span>No data</span>
       </div>
     </div>
@@ -20,11 +19,10 @@ import eventBus from "@/eventBus";
 import apis from "@/apis"
 import configs from "@/configs";
 import ImageCard from "@/components/ImageCard";
-import ThumbSizeSelector from "@/components/ThumbSizeSelector";
 
 export default {
   name: "ImageList",
-  components: {ThumbSizeSelector, ImageCard},
+  components: {ImageCard},
   props: {
     management: {
       default: false,
@@ -37,6 +35,10 @@ export default {
     albumId: {
       default: null,
       type: Number
+    },
+    ignoreAlbumId: {
+      default: false,
+      type: Boolean
     }
   },
   created() {
@@ -112,8 +114,8 @@ export default {
         page: 0,
         size: 30,
         name: null,
-        albumId: null,
         tagId: null,
+        ignoreAlbum: this.ignoreAlbumId,
         status: (this.queryAbnormalState === true) ? null : 2,
       },
       loading: false,
@@ -130,7 +132,7 @@ export default {
         return ;
       }
       this.loading = true
-      apis.getResources({...this.query, albumId: this.albumId }).then((payload) => {
+      apis.getResources({...this.query, albumId: this.thisId }).then((payload) => {
         if (this.query.page === 0) {
           this.contents = []
         }
@@ -143,6 +145,9 @@ export default {
     }
   },
   computed: {
+    thisId() {
+      return this.albumId
+    },
     hiddenItemCount() {
       let thumbnailConfig = configs.thumbnailConfig[this.sizeType]
       return Math.floor((this.containerWidth + 10) / (thumbnailConfig.displaySize + 10))
@@ -151,15 +156,20 @@ export default {
       return configs.thumbnailConfig[this.sizeType].displaySize
     },
   },
+  watch: {
+    thisId() {
+      this.query.page = 0
+      this.last = false
+      this.loadNextPage()
+    }
+  }
 }
 </script>
 
 <style scoped>
 
 .empty-view {
-  width: 50%;
-  max-width: 128px;
-  object-fit: cover;
+  width: 384px;
   display: flex;
   flex-flow: column nowrap;
   align-self: center;

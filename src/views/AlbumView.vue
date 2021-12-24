@@ -2,7 +2,7 @@
   <div ref="frameContainer" :style="`display: flex; flex-flow: row-reverse ${wrapState}; gap: 24px;`">
     <div :style="`width: ${sideMenuWidth}; min-width: 240px`">
       <el-card shadow="never">
-        <TagList :album-id="parseInt(this.$route.params.albumId)"/>
+        <TagList :album-id="albumId"/>
       </el-card>
     </div>
     <div style="flex: 1 1 auto">
@@ -10,9 +10,27 @@
         <el-breadcrumb separator="/">
           <el-breadcrumb-item :to="{ path: '/' }">Home</el-breadcrumb-item>
           <el-breadcrumb-item :to="{ path: '/albums' }">Albums</el-breadcrumb-item>
-          <el-breadcrumb-item>{{ albumData.name }} ({{ albumData.albumSize }})</el-breadcrumb-item>
+          <template v-for="item in parents">
+            <el-breadcrumb-item :key="'breadcrumb-' + item.albumId" :to="{ name: 'album', params: { albumId: item.albumId } }">
+              {{ item.name }}
+            </el-breadcrumb-item>
+          </template>
+          <el-breadcrumb-item>{{ albumData.name }} ({{ albumData.subAlbumCount }} + {{ albumData.albumSize }})</el-breadcrumb-item>
         </el-breadcrumb>
-        <ImageList :query-abnormal-state="true" :album-id="parseInt(this.$route.params.albumId)"/>
+
+        <ThumbSizeSelector />
+
+        <template v-if="albumData.subAlbumCount !== 0">
+          <el-divider content-position="left">
+            <span>Albums</span>
+          </el-divider>
+          <AlbumList :album-id="albumId" />
+          <el-divider content-position="left">
+            <span>Items</span>
+          </el-divider>
+        </template>
+
+        <ImageList :query-abnormal-state="true" :album-id="albumId"/>
       </el-card>
     </div>
   </div>
@@ -23,9 +41,11 @@ import eventBus from "@/eventBus"
 import TagList from "@/components/TagList";
 import ImageList from "@/components/ImageList";
 import apis from "@/apis";
+import AlbumList from "@/components/AlbumList";
+import ThumbSizeSelector from "@/components/ThumbSizeSelector";
 export default {
   name: "AlbumView",
-  components: {ImageList, TagList},
+  components: {ThumbSizeSelector, AlbumList, ImageList, TagList},
   mounted() {
     this.updateLayoutStyle(this.$refs.frameContainer.clientWidth)
     eventBus.bus.$on(eventBus.events.screenSizeChanged, () => {
@@ -41,10 +61,12 @@ export default {
       wrapState: "nowrap",
       sideMenuWidth: "240px",
       albumData: {
-        albumId: null,
         name: '',
         albumSize: 0,
+        subAlbumCount: 0,
+        parent: null,
       },
+      parents: [],
       loading: false,
     }
   },
@@ -62,9 +84,26 @@ export default {
       this.loading = true
       apis.getAlbum(this.$route.params.albumId).then((payload) => {
         this.albumData = payload.data
+        this.parents = []
+        let current = this.albumData.parent
+        while (current !== null) {
+          this.parents.push(current)
+          current = current.parent
+        }
+        this.parents.reverse()
       }).finally(() => {
         this.loading = false
       })
+    },
+  },
+  computed: {
+    albumId() {
+      return parseInt(this.$route.params.albumId)
+    }
+  },
+  watch: {
+    albumId() {
+      this.loadAlbum()
     }
   }
 }

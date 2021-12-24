@@ -22,7 +22,11 @@ export default {
     albumId: {
       default: null,
       type: Number,
-    }
+    },
+    ignoreAlbum: {
+      default: false,
+      type: Boolean
+    },
   },
   data() {
     return {
@@ -55,7 +59,7 @@ export default {
       eventBus.bus.$emit(eventBus.events.searchTag, this.selectedTagId)
     },
     loadTags() {
-      apis.getTags({albumId: this.albumId}).then((payload) => {
+      apis.getTags({albumId: this.albumId, ignoreAlbum: this.ignoreAlbum}).then((payload) => {
         this.tags = payload.data
       })
     }

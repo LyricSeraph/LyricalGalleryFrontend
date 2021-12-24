@@ -5,6 +5,8 @@
         <el-breadcrumb-item :to="{ path: '/' }">Home</el-breadcrumb-item>
         <el-breadcrumb-item>Albums</el-breadcrumb-item>
       </el-breadcrumb>
+
+      <ThumbSizeSelector />
       <AlbumList />
     </div>
   </el-card>
@@ -12,10 +14,11 @@
 
 <script>
 import AlbumList from "@/components/AlbumList";
+import ThumbSizeSelector from "@/components/ThumbSizeSelector";
 
 export default {
   name: "Albums",
-  components: {AlbumList},
+  components: {ThumbSizeSelector, AlbumList},
   data() {
     return {}
   }

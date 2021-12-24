@@ -109,5 +109,8 @@ export default {
     },
     async getResources(data) {
         return await instance.get("/api/public/resource?" + querystring.stringify(data));
+    },
+    async deleteAlbum(id) {
+        return await instance.delete("/api/private/album/" + id)
     }
 }

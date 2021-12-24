@@ -8,11 +8,14 @@
       </el-menu-item>
       <el-menu-item index="/">Home</el-menu-item>
       <el-menu-item index="/albums">Album</el-menu-item>
-      <el-submenu index="/management">
-        <template slot="title">Management</template>
-        <el-menu-item index="/management/albums">Album Management</el-menu-item>
-        <el-menu-item index="/management/tags">Tag Management</el-menu-item>
-      </el-submenu>
+      <template v-if="authSuccess">
+        <el-submenu index="/management">
+          <template slot="title">Management</template>
+          <el-menu-item index="/management/albums">Album Management</el-menu-item>
+          <el-menu-item index="/management/tags">Tag Management</el-menu-item>
+          <el-menu-item index="/management/recycle-bin">Recycle Bin</el-menu-item>
+        </el-submenu>
+      </template>
       <el-menu-item class="non-menu-item dock-right">
         <el-link type="primary" @click="showAuthentication">Authentication</el-link>
       </el-menu-item>
@@ -53,6 +56,7 @@ export default {
       supportedPath: ["/", "/albums", "/management/albums", "/management/tags"],
       textToSearch: "",
       authKey: "",
+      authSuccess: false,
       dialogVisible: false,
     };
   },
@@ -61,7 +65,10 @@ export default {
       this.$store.commit("setAuthKey", this.authKey)
       this.dialogVisible = false
       apis.checkAuthKey().then(() => {
+        this.authSuccess = true
         this.$message.success("Config authentication key success")
+      }).catch(() => {
+        this.authSuccess = false
       }).finally(() =>{})
     },
     handleSelect(key) {

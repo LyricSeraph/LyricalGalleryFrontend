@@ -45,7 +45,7 @@ export default {
       }
     },
     loadTags() {
-      apis.getTags({}).then((payload) => {
+      apis.getTags({ignoreAlbum: true}).then((payload) => {
         this.tags = payload.data
         this.$store.commit("saveTags", this.tags)
       })
