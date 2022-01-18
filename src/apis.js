@@ -56,6 +56,7 @@ instance.interceptors.response.use(function (response) {
 });
 
 export default {
+    instance,
     async checkAuthKey() {
         return await instance.get("/api/private/verification")
     },

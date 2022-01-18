@@ -37,6 +37,7 @@
               drag
               list-type="fileList"
               :file-list="uploadFileList"
+              :http-request="httpRequest"
               :on-success="handleUploadSuccess" multiple>
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">Drag files here，or <em>click upload</em></div>
@@ -156,6 +157,24 @@ export default {
         this.wrapState = 'wrap'
         this.sideMenuWidth = "100%"
       }
+    },
+    httpRequest(params) {
+      const form = new FormData()
+      form.append('file', params.file)
+      // eslint-disable-next-line no-unused-vars
+      const progressHandle = (progressEvent) => {
+        let num = progressEvent.loaded / progressEvent.total * 100 | 0;
+        params.onProgress({percent: num})
+      }
+      apis.instance.post("/api/private/resource/upload?album=" + this.albumId.toString(),
+          form, { onUploadProgress: progressHandle })
+          .then((response) => {
+            console.log("upload success: ", params.file)
+            params.onSuccess(response)
+          })
+          .catch(() => {
+
+          })
     },
     loadAlbum() {
       this.albumLoading = true
